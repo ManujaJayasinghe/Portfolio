@@ -1,0 +1,140 @@
+{
+  ".claude/settings.local.json": {
+    "mtime": 1791202397.4418154,
+    "seen": 1791202905.4613676,
+    "ast_hash": "faf59b843098b1692c8a57419cdc118c",
+    "semantic_hash": "faf59b843098b1692c8a57419cdc118c"
+  },
+  ".vscode/settings.json": {
+    "mtime": 1790605784.3854032,
+    "seen": 1791202905.4613676,
+    "ast_hash": "73792b9af3fc811b105441cc773526b1",
+    "semantic_hash": "73792b9af3fc811b105441cc773526b1"
+  },
+  "main.js": {
+    "mtime": 1791196569.6168225,
+    "seen": 1791202905.4613676,
+    "ast_hash": "ef3f5aa3cba969bed178d69a3affe383",
+    "semantic_hash": "ef3f5aa3cba969bed178d69a3affe383"
+  },
+  "README.md": {
+    "mtime": 1791196569.6168225,
+    "seen": 1791202905.4613676,
+    "ast_hash": "e2275b26f6bced61e333843272e46d6d",
+    "semantic_hash": "e2275b26f6bced61e333843272e46d6d"
+  },
+  "index.html": {
+    "mtime": 1791196394.7010736,
+    "seen": 1791202905.4613676,
+    "ast_hash": "236669bf1c5391f2df86a98e7709d29c",
+    "semantic_hash": "236669bf1c5391f2df86a98e7709d29c"
+  },
+  "license.txt": {
+    "mtime": 1646927000.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "271a36a0dc43cd461b2c25e2b74a7a4a",
+    "semantic_hash": "271a36a0dc43cd461b2c25e2b74a7a4a"
+  },
+  "assets/textures/Planet_diffuse.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "624829628f962cbfdc961915ca6230f7",
+    "semantic_hash": "624829628f962cbfdc961915ca6230f7"
+  },
+  "assets/textures/black_hole_blackoutside_diffuse.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "50418019d0052882d9c67985449ca7d7",
+    "semantic_hash": "50418019d0052882d9c67985449ca7d7"
+  },
+  "assets/textures/black_hole_blackoutside_specularGlossiness.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "692c256c3bdcc8ba29f6083826177153",
+    "semantic_hash": "692c256c3bdcc8ba29f6083826177153"
+  },
+  "assets/textures/black_hole_light1_diffuse.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "5860fb71a512d72aefc9531b545266a9",
+    "semantic_hash": "5860fb71a512d72aefc9531b545266a9"
+  },
+  "assets/textures/black_hole_light1_emissive.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "f6fd4bb321de92500a22131662f356ae",
+    "semantic_hash": "f6fd4bb321de92500a22131662f356ae"
+  },
+  "assets/textures/black_hole_light2_diffuse.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "49fe50cd172d77f84c7538380633db2a",
+    "semantic_hash": "49fe50cd172d77f84c7538380633db2a"
+  },
+  "assets/textures/black_hole_light2_emissive.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "f93b749fb402e1e54766934390c5ee2f",
+    "semantic_hash": "f93b749fb402e1e54766934390c5ee2f"
+  },
+  "assets/textures/black_hole_light3_diffuse.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "5700b654aa7627b88cd8d1edde28edce",
+    "semantic_hash": "5700b654aa7627b88cd8d1edde28edce"
+  },
+  "assets/textures/black_hole_light3_emissive.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "dbb31644cf835b2592c822603c5ae321",
+    "semantic_hash": "dbb31644cf835b2592c822603c5ae321"
+  },
+  "assets/textures/ring2_specularGlossiness.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "03fa2f54a4cf14e27382dd774eb7df4c",
+    "semantic_hash": "03fa2f54a4cf14e27382dd774eb7df4c"
+  },
+  "assets/textures/ring_diffuse.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "178922c982c09d9564f2831d77db3b7c",
+    "semantic_hash": "178922c982c09d9564f2831d77db3b7c"
+  },
+  "assets/textures/ring_specularGlossiness.png": {
+    "mtime": 1790237969.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "8080547c239e85a92982e426283c7f6d",
+    "semantic_hash": "8080547c239e85a92982e426283c7f6d"
+  },
+  "textures/Blackhole_ring2_emissive.jpeg": {
+    "mtime": 1646927040.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "84e1bd4d46067f57b14b99679460e41a",
+    "semantic_hash": "84e1bd4d46067f57b14b99679460e41a"
+  },
+  "textures/Blackhole_ring_baseColor.png": {
+    "mtime": 1646927024.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "5ca09d60352f5fd431df3b7b11845a56",
+    "semantic_hash": "5ca09d60352f5fd431df3b7b11845a56"
+  },
+  "textures/Blackhole_ring_emissive.jpeg": {
+    "mtime": 1646927028.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "d35772009c2b5dc11e4ac48dc13038ad",
+    "semantic_hash": "d35772009c2b5dc11e4ac48dc13038ad"
+  },
+  "textures/Blackhole_skin_emissive.jpeg": {
+    "mtime": 1646927032.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "543c7491b62243c9ec7ba809bcd1a80f",
+    "semantic_hash": "543c7491b62243c9ec7ba809bcd1a80f"
+  },
+  "textures/Blackhole_skin_inner_emissive.jpeg": {
+    "mtime": 1646927036.0,
+    "seen": 1791202905.4613676,
+    "ast_hash": "a6d442994fefe860003b846a3a0ff575",
+    "semantic_hash": "a6d442994fefe860003b846a3a0ff575"
+  }
+}

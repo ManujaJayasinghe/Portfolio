@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manuja — Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,200;9..144,300;9..144,500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"><div id="cursor-dot"></div></div>
+
+<!-- WebGL canvas -->
+<canvas id="scene"></canvas>
+
+<!-- Depth vignette -->
+<div id="vignette"></div>
+
+<!-- Falling into the hole goes dark first… -->
+<div id="void"></div>
+
+<!-- …then the event-horizon crossing: screen washes to light, then reveals the planet -->
+<div id="warp"></div>
+
+<!-- Dims the scene behind the content sections -->
+<div id="scrim"></div>
+
+<!-- Loader -->
+<div id="loader">
+  <div id="loader-ring"></div>
+  <div id="loader-label">Loading…</div>
+  <div id="loader-bar"><div id="loader-fill"></div></div>
+</div>
+
+<!-- ═══ HERO (fixed overlay) ═══════════════════════════════════ -->
+<header id="hero-overlay">
+
+  <!-- top nav -->
+  <nav id="hero-nav">
+    <span class="nav-logo" data-split>MNJ</span>
+    <ul class="nav-links">
+      <li><a href="#sec-skills"   class="nav-link magnetic" data-split>Skills</a></li>
+      <li><a href="#sec-education" class="nav-link magnetic" data-split>Projects</a></li>
+      <li><a href="#sec-references" class="nav-link magnetic" data-split>Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- hero copy -->
+  <div id="hero-copy">
+    <p class="hero-eyebrow" data-split-words>Software Engineer  ·  Full‑Stack Developer</p>
+    <h1 id="hero-name">
+      <span class="name-line" data-split-chars>Manuja</span>
+    </h1>
+    <p class="hero-lede" data-split-words>
+      Forging elegant solutions from concept to deployment —<br>
+      React · ASP.NET Core · Spring Boot · Flutter
+    </p>
+  </div>
+
+  <!-- scroll cue -->
+  <div class="scroll-cue">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+
+</header>
+
+<!-- Scroll room: page 1 (hero) is the first 100vh, then the dive -->
+<div id="hero-spacer" aria-hidden="true"></div>
+<div id="dive-spacer" aria-hidden="true"></div>
+
+<!-- ═══ CONTENT SECTIONS ════════════════════════════════════════ -->
+<main id="content-sections">
+
+  <!-- 00 PLANET — the view on the other side of the black hole -->
+  <section class="section" id="sec-planet">
+    <div class="section-inner">
+      <div class="planet-copy">
+        <p class="planet-eyebrow">Beyond the event horizon</p>
+        <h2 class="planet-heading">Every project is<br>a small world.</h2>
+        <p class="planet-lede">
+          Here's what I build them with, the ones I've shipped,
+          and the people who've seen me work.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 SKILLS -->
+  <section class="section" id="sec-skills">
+    <div class="section-inner">
+      <div class="section-label" data-reveal>
+        <span class="label-num">01</span>
+        <span class="label-line"></span>
+        <span class="label-text">Arsenal</span>
+      </div>
+
+      <h2 class="section-heading" data-split-lines>Technical<br>Expertise</h2>
+
+      <div class="skill-grid">
+        <div class="skill-card" data-card>
+          <div class="card-index">01</div>
+          <h3 class="card-title" data-split-words>Frontend</h3>
+          <ul class="card-list">
+            <li data-reveal-item>React &amp; Next.js</li>
+            <li data-reveal-item>Flutter / Dart</li>
+            <li data-reveal-item>Three.js / WebGL</li>
+            <li data-reveal-item>HTML5 · CSS3</li>
+          </ul>
+          <div class="card-glow"></div>
+        </div>
+
+        <div class="skill-card" data-card>
+          <div class="card-index">02</div>
+          <h3 class="card-title" data-split-words>Backend</h3>
+          <ul class="card-list">
+            <li data-reveal-item>ASP.NET Core</li>
+            <li data-reveal-item>Spring Boot</li>
+            <li data-reveal-item>REST &amp; GraphQL</li>
+            <li data-reveal-item>Node.js</li>
+          </ul>
+          <div class="card-glow"></div>
+        </div>
+
+        <div class="skill-card" data-card>
+          <div class="card-index">03</div>
+          <h3 class="card-title" data-split-words>Database</h3>
+          <ul class="card-list">
+            <li data-reveal-item>SQL Server</li>
+            <li data-reveal-item>PostgreSQL</li>
+            <li data-reveal-item>Schema Design</li>
+            <li data-reveal-item>Query Optimization</li>
+          </ul>
+          <div class="card-glow"></div>
+        </div>
+
+        <div class="skill-card" data-card>
+          <div class="card-index">04</div>
+          <h3 class="card-title" data-split-words>DevOps</h3>
+          <ul class="card-list">
+            <li data-reveal-item>Git &amp; GitHub</li>
+            <li data-reveal-item>Docker</li>
+            <li data-reveal-item>CI/CD Pipelines</li>
+            <li data-reveal-item>Agile / Scrum</li>
+          </ul>
+          <div class="card-glow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 EDUCATION -->
+  <section class="section" id="sec-education">
+    <div class="section-inner">
+      <div class="section-label" data-reveal>
+        <span class="label-num">02</span>
+        <span class="label-line"></span>
+        <span class="label-text">Foundation</span>
+      </div>
+
+      <h2 class="section-heading" data-split-lines>Education &amp;<br>Projects</h2>
+
+      <div class="edu-layout">
+        <div class="edu-card" data-card>
+          <div class="edu-badge" data-reveal>BSc (Hons)</div>
+          <h3 class="edu-degree" data-split-lines>Software<br>Engineering</h3>
+          <p class="edu-uni" data-reveal>NSBM Green University</p>
+          <p class="edu-desc" data-reveal>
+            Built a deep foundation in algorithms, system design, mobile development,
+            and AI‑assisted systems. Theory meets practice in every project I ship.
+          </p>
+          <div class="edu-tags">
+            <span data-reveal-item>Algorithms</span>
+            <span data-reveal-item>System Design</span>
+            <span data-reveal-item>AI &amp; ML</span>
+            <span data-reveal-item>Mobile Dev</span>
+          </div>
+        </div>
+
+        <div class="proj-list-block">
+          <p class="proj-list-label" data-reveal>Featured Projects</p>
+          <ul class="proj-list">
+            <li class="proj-list-item" data-card>
+              <span class="pli-num">—</span>
+              <div class="pli-content">
+                <strong data-split-words>Fitness Sharks</strong>
+                <span>React · Spring Boot · SQL Server</span>
+              </div>
+              <span class="pli-arrow">↗</span>
+            </li>
+            <li class="proj-list-item" data-card>
+              <span class="pli-num">—</span>
+              <div class="pli-content">
+                <strong data-split-words>AI Recruitment Platform</strong>
+                <span>Full‑stack · Machine Learning</span>
+              </div>
+              <span class="pli-arrow">↗</span>
+            </li>
+            <li class="proj-list-item" data-card>
+              <span class="pli-num">—</span>
+              <div class="pli-content">
+                <strong data-split-words>Dengue Risk Mapper</strong>
+                <span>Flutter · Geospatial</span>
+              </div>
+              <span class="pli-arrow">↗</span>
+            </li>
+            <li class="proj-list-item" data-card>
+              <span class="pli-num">—</span>
+              <div class="pli-content">
+                <strong data-split-words>Community Safety Composite</strong>
+                <span>Computer Vision · ML Pipeline</span>
+              </div>
+              <span class="pli-arrow">↗</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 REFERENCES & CONTACT -->
+  <section class="section" id="sec-references">
+    <div class="section-inner">
+      <div class="section-label" data-reveal>
+        <span class="label-num">03</span>
+        <span class="label-line"></span>
+        <span class="label-text">Contact</span>
+      </div>
+
+      <h2 class="section-heading" data-split-lines>Let's Build<br>Something</h2>
+
+      <p class="ref-intro" data-reveal>
+        Available for freelance work and full-time roles.<br>
+        References available upon request.
+      </p>
+
+      <div class="ref-row">
+        <div class="ref-card" data-card>
+          <div class="ref-avatar">A</div>
+          <div class="ref-info">
+            <strong data-split-words>Academic Reference</strong>
+            <span data-reveal>NSBM Green University — Faculty of Computing</span>
+          </div>
+        </div>
+        <div class="ref-card" data-card>
+          <div class="ref-avatar">I</div>
+          <div class="ref-info">
+            <strong data-split-words>Industry Reference</strong>
+            <span data-reveal>Available on request</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-row">
+        <a class="cta-btn magnetic" href="mailto:manuja@example.com">
+          <span class="cta-text">Send a message</span>
+          <span class="cta-arrow">→</span>
+          <span class="cta-fill"></span>
+        </a>
+        <div class="social-row">
+          <a class="social-link magnetic" href="#">GitHub</a>
+          <a class="social-link magnetic" href="#">LinkedIn</a>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="site-footer" data-reveal>
+      © 2024 Manuja · Built with Three.js · Black hole model by <a href="https://sketchfab.com/Nestaeric" target="_blank" rel="noopener">NestaEric</a> (CC BY 4.0)
+    </footer>
+  </section>
+
+</main>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="main.js"></script>
+</body>
+</html>
