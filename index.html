@@ -3,27 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manuja — Software Engineer</title>
+<title>Manuja Jayasinghe | Full-Stack Developer</title>
+<meta name="description" content="Manuja Jayasinghe is a Computer Science undergraduate and full-stack developer building role-based platforms, secure REST backends and AI integrations. 1st place, FAL Track, Cursor Buildathon 2026.">
+<meta name="theme-color" content="#060504">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Manuja Jayasinghe | Full-Stack Developer">
+<meta property="og:description" content="Full-stack developer and CS undergraduate from Sri Lanka. React, Spring Boot, ASP.NET Core and AI API integrations.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23060504'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23f4a340' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,200;9..144,300;9..144,500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Custom cursor -->
-<div id="cursor"><div id="cursor-dot"></div></div>
+<a class="skip-link" href="#content-sections">Skip to content</a>
 
 <!-- WebGL canvas -->
-<canvas id="scene"></canvas>
+<canvas id="scene" aria-hidden="true"></canvas>
 
 <!-- Depth vignette -->
 <div id="vignette"></div>
 
-<!-- Falling into the hole goes dark first… -->
+<!-- Falling into the hole goes dark first, then the event-horizon crossing washes to light -->
 <div id="void"></div>
-
-<!-- …then the event-horizon crossing: screen washes to light, then reveals the planet -->
 <div id="warp"></div>
 
 <!-- Dims the scene behind the content sections -->
@@ -32,250 +36,277 @@
 <!-- Loader -->
 <div id="loader">
   <div id="loader-ring"></div>
-  <div id="loader-label">Loading…</div>
+  <div id="loader-label">Loading</div>
   <div id="loader-bar"><div id="loader-fill"></div></div>
 </div>
 
-<!-- ═══ HERO (fixed overlay) ═══════════════════════════════════ -->
+<!-- Persistent floating nav -->
+<nav id="site-nav" aria-label="Primary">
+  <a class="nav-logo" href="#top" aria-label="Back to top">MNJ</a>
+  <ul class="nav-links">
+    <li><a href="#sec-skills"    class="nav-link">Skills</a></li>
+    <li><a href="#sec-projects"  class="nav-link">Projects</a></li>
+    <li><a href="#sec-education" class="nav-link">Education</a></li>
+    <li><a href="#sec-contact"   class="nav-link">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO (fixed overlay) -->
 <header id="hero-overlay">
-
-  <!-- top nav -->
-  <nav id="hero-nav">
-    <span class="nav-logo" data-split>MNJ</span>
-    <ul class="nav-links">
-      <li><a href="#sec-skills"   class="nav-link magnetic" data-split>Skills</a></li>
-      <li><a href="#sec-education" class="nav-link magnetic" data-split>Projects</a></li>
-      <li><a href="#sec-references" class="nav-link magnetic" data-split>Contact</a></li>
-    </ul>
-  </nav>
-
-  <!-- hero copy -->
   <div id="hero-copy">
-    <p class="hero-eyebrow" data-split-words>Software Engineer  ·  Full‑Stack Developer</p>
-    <h1 id="hero-name">
-      <span class="name-line" data-split-chars>Manuja</span>
+    <p class="hero-eyebrow" data-split-words>Full-Stack Developer and CS Undergraduate</p>
+    <h1 id="hero-name" aria-label="Manuja Jayasinghe">
+      <span class="name-line" data-split-chars aria-hidden="true">Manuja</span>
+      <span class="name-line" data-split-chars aria-hidden="true">Jayasinghe</span>
     </h1>
     <p class="hero-lede" data-split-words>
-      Forging elegant solutions from concept to deployment —<br>
-      React · ASP.NET Core · Spring Boot · Flutter
+      Building production-grade web apps and AI integrations. 1st place, FAL Track, Cursor Buildathon 2026.
     </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary magnetic" href="#sec-projects">
+        <span>View projects</span>
+        <span class="btn-icon"><i class="ph ph-arrow-down-right" aria-hidden="true"></i></span>
+      </a>
+      <a class="btn-link" href="https://github.com/ManujaJayasinghe" target="_blank" rel="noopener">
+        <i class="ph ph-github-logo" aria-hidden="true"></i><span>GitHub</span>
+      </a>
+    </div>
   </div>
-
-  <!-- scroll cue -->
-  <div class="scroll-cue">
-    <div class="scroll-line"></div>
-    <span>Scroll</span>
-  </div>
-
 </header>
 
 <!-- Scroll room: page 1 (hero) is the first 100vh, then the dive -->
+<div id="top" aria-hidden="true"></div>
 <div id="hero-spacer" aria-hidden="true"></div>
 <div id="dive-spacer" aria-hidden="true"></div>
 
-<!-- ═══ CONTENT SECTIONS ════════════════════════════════════════ -->
+<!-- CONTENT SECTIONS -->
 <main id="content-sections">
 
-  <!-- 00 PLANET — the view on the other side of the black hole -->
+  <!-- PLANET: the view on the other side of the black hole -->
   <section class="section" id="sec-planet">
     <div class="section-inner">
       <div class="planet-copy">
-        <p class="planet-eyebrow">Beyond the event horizon</p>
         <h2 class="planet-heading">Every project is<br>a small world.</h2>
         <p class="planet-lede">
-          Here's what I build them with, the ones I've shipped,
-          and the people who've seen me work.
+          Computer Science undergraduate building secure backends, role-based platforms and AI integrations.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- 01 SKILLS -->
+  <!-- SKILLS -->
   <section class="section" id="sec-skills">
-    <div class="section-inner">
-      <div class="section-label" data-reveal>
-        <span class="label-num">01</span>
-        <span class="label-line"></span>
-        <span class="label-text">Arsenal</span>
-      </div>
+    <div class="section-inner section-inner--wide">
+      <h2 class="section-heading" data-split-lines>Technical<br>expertise</h2>
 
-      <h2 class="section-heading" data-split-lines>Technical<br>Expertise</h2>
-
-      <div class="skill-grid">
-        <div class="skill-card" data-card>
-          <div class="card-index">01</div>
-          <h3 class="card-title" data-split-words>Frontend</h3>
-          <ul class="card-list">
-            <li data-reveal-item>React &amp; Next.js</li>
-            <li data-reveal-item>Flutter / Dart</li>
-            <li data-reveal-item>Three.js / WebGL</li>
-            <li data-reveal-item>HTML5 · CSS3</li>
+      <div class="bento">
+        <article class="panel panel--dots b-lang" data-reveal data-spot>
+          <h3 class="panel-title">Programming languages</h3>
+          <ul class="chips">
+            <li>Python</li><li>JavaScript</li><li>Java</li><li>C</li><li>C++</li><li>SQL</li><li>HTML/CSS</li>
           </ul>
-          <div class="card-glow"></div>
-        </div>
+        </article>
 
-        <div class="skill-card" data-card>
-          <div class="card-index">02</div>
-          <h3 class="card-title" data-split-words>Backend</h3>
-          <ul class="card-list">
-            <li data-reveal-item>ASP.NET Core</li>
-            <li data-reveal-item>Spring Boot</li>
-            <li data-reveal-item>REST &amp; GraphQL</li>
-            <li data-reveal-item>Node.js</li>
+        <article class="panel b-fw" data-reveal data-spot style="--d:.06s">
+          <h3 class="panel-title">Frameworks and libraries</h3>
+          <ul class="chips">
+            <li>Spring Boot</li><li>React</li><li>Node.js</li><li>Express</li><li>Vite</li>
           </ul>
-          <div class="card-glow"></div>
-        </div>
+        </article>
 
-        <div class="skill-card" data-card>
-          <div class="card-index">03</div>
-          <h3 class="card-title" data-split-words>Database</h3>
-          <ul class="card-list">
-            <li data-reveal-item>SQL Server</li>
-            <li data-reveal-item>PostgreSQL</li>
-            <li data-reveal-item>Schema Design</li>
-            <li data-reveal-item>Query Optimization</li>
+        <article class="panel panel--accent b-ai" data-reveal data-spot style="--d:.04s">
+          <h3 class="panel-title">AI and API integration</h3>
+          <p class="panel-note">Structured prompt pipelines and generative model APIs, shipped to production.</p>
+          <ul class="chips">
+            <li>Prompt engineering</li><li>API integration</li><li>Generative models</li><li>Fal AI</li><li>OpenAI API</li><li>REST APIs</li>
           </ul>
-          <div class="card-glow"></div>
-        </div>
+        </article>
 
-        <div class="skill-card" data-card>
-          <div class="card-index">04</div>
-          <h3 class="card-title" data-split-words>DevOps</h3>
-          <ul class="card-list">
-            <li data-reveal-item>Git &amp; GitHub</li>
-            <li data-reveal-item>Docker</li>
-            <li data-reveal-item>CI/CD Pipelines</li>
-            <li data-reveal-item>Agile / Scrum</li>
+        <article class="panel b-tools" data-reveal data-spot style="--d:.1s">
+          <h3 class="panel-title">AI development tools</h3>
+          <ul class="chips">
+            <li>Cursor</li><li>Claude</li><li>GitHub Copilot</li><li>Antigravity</li><li>Kiro</li>
           </ul>
-          <div class="card-glow"></div>
-        </div>
+        </article>
+
+        <article class="panel b-mobile" data-reveal data-spot>
+          <h3 class="panel-title">Mobile</h3>
+          <ul class="chips">
+            <li>Flutter</li><li class="chip-soft">Android Studio (in progress)</li>
+          </ul>
+        </article>
+
+        <article class="panel b-db" data-reveal data-spot style="--d:.06s">
+          <h3 class="panel-title">Databases</h3>
+          <ul class="chips">
+            <li>MySQL</li><li>SQL Server</li>
+          </ul>
+        </article>
+
+        <article class="panel b-ship" data-reveal data-spot style="--d:.12s">
+          <h3 class="panel-title">Tools and platforms</h3>
+          <ul class="chips">
+            <li>Git</li><li>GitHub</li><li>Netlify</li><li>Vercel</li>
+          </ul>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- 02 EDUCATION -->
-  <section class="section" id="sec-education">
-    <div class="section-inner">
-      <div class="section-label" data-reveal>
-        <span class="label-num">02</span>
-        <span class="label-line"></span>
-        <span class="label-text">Foundation</span>
-      </div>
+  <!-- PROJECTS -->
+  <section class="section" id="sec-projects">
+    <div class="section-inner section-inner--wide">
+      <h2 class="section-heading" data-split-lines>Selected<br>projects</h2>
 
-      <h2 class="section-heading" data-split-lines>Education &amp;<br>Projects</h2>
+      <div class="project-grid">
 
-      <div class="edu-layout">
-        <div class="edu-card" data-card>
-          <div class="edu-badge" data-reveal>BSc (Hons)</div>
-          <h3 class="edu-degree" data-split-lines>Software<br>Engineering</h3>
-          <p class="edu-uni" data-reveal>NSBM Green University</p>
-          <p class="edu-desc" data-reveal>
-            Built a deep foundation in algorithms, system design, mobile development,
-            and AI‑assisted systems. Theory meets practice in every project I ship.
-          </p>
-          <div class="edu-tags">
-            <span data-reveal-item>Algorithms</span>
-            <span data-reveal-item>System Design</span>
-            <span data-reveal-item>AI &amp; ML</span>
-            <span data-reveal-item>Mobile Dev</span>
+        <article class="project project--feature" data-reveal data-spot>
+          <div class="project-main">
+            <ul class="awards">
+              <li class="award"><i class="ph ph-trophy" aria-hidden="true"></i>1st place, FAL Track, Cursor Buildathon 2026</li>
+              <li class="award award--soft">Top 13 Audience Choice, 110 teams</li>
+            </ul>
+            <h3 class="project-title">ClearSight Recon</h3>
+            <p class="project-sub">AI forensic composite sketch generator</p>
+            <p class="project-role">Team project</p>
+            <ul class="chips">
+              <li>React</li><li>Vite</li><li>Fal AI</li><li>REST API</li><li>Netlify</li><li>jsPDF</li>
+            </ul>
           </div>
-        </div>
-
-        <div class="proj-list-block">
-          <p class="proj-list-label" data-reveal>Featured Projects</p>
-          <ul class="proj-list">
-            <li class="proj-list-item" data-card>
-              <span class="pli-num">—</span>
-              <div class="pli-content">
-                <strong data-split-words>Fitness Sharks</strong>
-                <span>React · Spring Boot · SQL Server</span>
-              </div>
-              <span class="pli-arrow">↗</span>
-            </li>
-            <li class="proj-list-item" data-card>
-              <span class="pli-num">—</span>
-              <div class="pli-content">
-                <strong data-split-words>AI Recruitment Platform</strong>
-                <span>Full‑stack · Machine Learning</span>
-              </div>
-              <span class="pli-arrow">↗</span>
-            </li>
-            <li class="proj-list-item" data-card>
-              <span class="pli-num">—</span>
-              <div class="pli-content">
-                <strong data-split-words>Dengue Risk Mapper</strong>
-                <span>Flutter · Geospatial</span>
-              </div>
-              <span class="pli-arrow">↗</span>
-            </li>
-            <li class="proj-list-item" data-card>
-              <span class="pli-num">—</span>
-              <div class="pli-content">
-                <strong data-split-words>Community Safety Composite</strong>
-                <span>Computer Vision · ML Pipeline</span>
-              </div>
-              <span class="pli-arrow">↗</span>
-            </li>
+          <ul class="project-points">
+            <li>Developed and integrated REST API calls to the Fal AI generative model, with a structured prompt engineering pipeline for consistent outputs.</li>
+            <li>Deployed a full-stack React app to Netlify with multilingual support (EN, SI, TA) and PDF export, all within a 24-hour build.</li>
           </ul>
-        </div>
+        </article>
+
+        <article class="project project--wide" data-reveal data-spot style="--d:.05s">
+          <h3 class="project-title">Job Recruitment Platform</h3>
+          <p class="project-role">Team project, lead developer</p>
+          <ul class="chips">
+            <li>React</li><li>ASP.NET Core</li><li>SQL Server</li><li>EF Core</li><li>JWT</li>
+          </ul>
+          <ul class="project-points">
+            <li>Built the complete backend (Clean Architecture, Repository and Unit-of-Work patterns) and all four role-based frontends: Admin, Recruiter, Hiring Manager and Candidate.</li>
+            <li>Delivered an AI-powered candidate chatbot and Google Calendar-synced interview scheduling, backed by JWT role authorization across all 4 portals.</li>
+          </ul>
+        </article>
+
+        <article class="project project--narrow" data-reveal data-spot style="--d:.1s">
+          <h3 class="project-title">Fitness Sharks</h3>
+          <p class="project-sub">Gym management system</p>
+          <p class="project-role">Individual project</p>
+          <ul class="chips">
+            <li>React</li><li>Spring Boot</li><li>MySQL</li><li>Spring Security</li><li>JPA/Hibernate</li>
+          </ul>
+          <ul class="project-points">
+            <li>Full-stack platform for memberships, trainer management, training plans and role-based subscriptions.</li>
+            <li>Payment gateway for subscriptions, secured with session-based authentication and role-based access control.</li>
+          </ul>
+        </article>
+
       </div>
     </div>
   </section>
 
-  <!-- 03 REFERENCES & CONTACT -->
-  <section class="section" id="sec-references">
-    <div class="section-inner">
-      <div class="section-label" data-reveal>
-        <span class="label-num">03</span>
-        <span class="label-line"></span>
-        <span class="label-text">Contact</span>
+  <!-- EDUCATION AND LEADERSHIP -->
+  <section class="section" id="sec-education">
+    <div class="section-inner section-inner--wide">
+      <h2 class="section-heading" data-split-lines>Education and<br>leadership</h2>
+
+      <div class="edu-grid">
+        <article class="panel edu-panel" data-reveal data-spot>
+          <h3 class="panel-title">Education</h3>
+          <div class="edu-item">
+            <p class="edu-degree">BSc (Honours) in Computer Science</p>
+            <p class="edu-meta">NSBM Green University</p>
+            <span class="tag">Expected 2028</span>
+          </div>
+          <div class="edu-item">
+            <p class="edu-degree">G.C.E. Advanced Level, Physical Science</p>
+            <p class="edu-meta">St. Sylvester's College, Kandy</p>
+            <span class="tag tag--soft">Completed 2023</span>
+          </div>
+          <div class="edu-langs">
+            <span class="edu-langs-label">Languages</span>
+            <ul class="chips">
+              <li>English <span class="chip-level">Advanced</span></li>
+              <li>Sinhala <span class="chip-level">Native</span></li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel lead-panel" data-reveal data-spot style="--d:.08s">
+          <h3 class="panel-title">Leadership</h3>
+          <ul class="lead-list">
+            <li>
+              <p class="lead-role">Committee member and developer</p>
+              <p class="lead-org">NSBM Circularity and Sustainability Community (NCSC)</p>
+            </li>
+            <li>
+              <p class="lead-role">Director of Personal Relationships</p>
+              <p class="lead-org">Interact Club, 2021-2023</p>
+            </li>
+            <li>
+              <p class="lead-role">Committee member and editor</p>
+              <p class="lead-org">ICT Society, St. Sylvester's College, 2021-2023</p>
+            </li>
+          </ul>
+        </article>
       </div>
+    </div>
+  </section>
 
-      <h2 class="section-heading" data-split-lines>Let's Build<br>Something</h2>
+  <!-- CONTACT -->
+  <section class="section" id="sec-contact">
+    <div class="section-inner">
+      <h2 class="section-heading" data-split-lines>Let's build<br>something together</h2>
 
-      <p class="ref-intro" data-reveal>
-        Available for freelance work and full-time roles.<br>
-        References available upon request.
+      <p class="contact-intro" data-reveal>
+        I'm looking for a software engineering or full-stack internship.
+        Send me a note and I'll reply quickly.
       </p>
 
-      <div class="ref-row">
-        <div class="ref-card" data-card>
-          <div class="ref-avatar">A</div>
-          <div class="ref-info">
-            <strong data-split-words>Academic Reference</strong>
-            <span data-reveal>NSBM Green University — Faculty of Computing</span>
-          </div>
-        </div>
-        <div class="ref-card" data-card>
-          <div class="ref-avatar">I</div>
-          <div class="ref-info">
-            <strong data-split-words>Industry Reference</strong>
-            <span data-reveal>Available on request</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="contact-row">
-        <a class="cta-btn magnetic" href="mailto:manuja@example.com">
-          <span class="cta-text">Send a message</span>
-          <span class="cta-arrow">→</span>
-          <span class="cta-fill"></span>
+      <div class="contact-cta" data-reveal style="--d:.06s">
+        <a class="btn btn-primary btn-lg magnetic" href="mailto:manujapabasara36203@gmail.com">
+          <span>Email me</span>
+          <span class="btn-icon"><i class="ph ph-arrow-up-right" aria-hidden="true"></i></span>
         </a>
-        <div class="social-row">
-          <a class="social-link magnetic" href="#">GitHub</a>
-          <a class="social-link magnetic" href="#">LinkedIn</a>
-        </div>
+        <a class="contact-mail" href="mailto:manujapabasara36203@gmail.com">manujapabasara36203@gmail.com</a>
       </div>
 
+      <ul class="contact-grid">
+        <li data-reveal>
+          <i class="ph ph-phone" aria-hidden="true"></i>
+          <span class="contact-label">Phone</span>
+          <a href="tel:+94701431773">+94 70 143 1773</a>
+        </li>
+        <li data-reveal style="--d:.05s">
+          <i class="ph ph-map-pin" aria-hidden="true"></i>
+          <span class="contact-label">Location</span>
+          <span>Peradeniya, Sri Lanka</span>
+        </li>
+        <li data-reveal style="--d:.1s">
+          <i class="ph ph-github-logo" aria-hidden="true"></i>
+          <span class="contact-label">GitHub</span>
+          <a href="https://github.com/ManujaJayasinghe" target="_blank" rel="noopener">ManujaJayasinghe</a>
+        </li>
+        <li data-reveal style="--d:.15s">
+          <i class="ph ph-linkedin-logo" aria-hidden="true"></i>
+          <span class="contact-label">LinkedIn</span>
+          <a href="https://www.linkedin.com/in/manuja-jayasinghe" target="_blank" rel="noopener">manuja-jayasinghe</a>
+        </li>
+      </ul>
     </div>
 
     <footer class="site-footer" data-reveal>
-      © 2024 Manuja · Built with Three.js · Black hole model by <a href="https://sketchfab.com/Nestaeric" target="_blank" rel="noopener">NestaEric</a> (CC BY 4.0)
+      <span>&copy; 2026 Manuja Jayasinghe</span>
+      <span>Built with Three.js. Black hole model by <a href="https://sketchfab.com/Nestaeric" target="_blank" rel="noopener">NestaEric</a> (CC BY 4.0)</span>
     </footer>
   </section>
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 <script type="importmap">
 {
   "imports": {

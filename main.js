@@ -10,7 +10,7 @@
  *      drift  → slow orbit around the planet behind the content sections
  *
  * ② Lusion-style animation engine
- *    - Custom cursor (lagged, magnetic)
+ *    - Magnetic buttons, spotlight panels
  *    - Split-text: chars, words, lines
  *    - IntersectionObserver scroll reveals
  */
@@ -27,7 +27,13 @@ import { OutputPass }      from 'three/addons/postprocessing/OutputPass.js';
 ═══════════════════════════════════════════════════════════════ */
 
 const params = new URLSearchParams(location.search);
+
+/* Smooth scrolling (Lenis) — native scroll position is still the source of truth */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const lenis = window.Lenis && !reduceMotion ? new window.Lenis({ lerp: 0.09, smoothWheel: true }) : null;
+if (lenis) (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
 const vec = (s) => s && (s.startsWith('p')
   ? nearPlanet(...s.slice(1).split(',').map(Number))
   : new THREE.Vector3(...s.split(',').map(Number)));
@@ -156,6 +162,7 @@ gltfLoader.load(
     });
 
     planet = model.getObjectByName('Planet');
+    smoothPlanet(planet);
     scene.add(model);
     model.updateMatrixWorld(true);
     planet.getWorldPosition(PLANET);
@@ -172,6 +179,22 @@ gltfLoader.load(
     loaderEl.querySelector('#loader-label').textContent = 'Load failed';
   }
 );
+
+/* The model's planet is only ~180 verts, so its silhouette is faceted.
+   Swap it for a high-res sphere that reuses the same texture/material. */
+function smoothPlanet(node) {
+  const old = node.children[0];
+  if (!old || !old.isMesh) return;
+  old.geometry.computeBoundingSphere();
+  const r = old.geometry.boundingSphere.radius;
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(r, 160, 120), old.material);
+  sphere.position.copy(old.position);
+  sphere.quaternion.copy(old.quaternion);
+  sphere.scale.copy(old.scale);
+  old.visible = false;
+  old.parent.add(sphere);
+  old.material.map && (old.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy());
+}
 
 /* Black-hole colour grade
    The source textures carry stray green / red fringes. Every disk and
@@ -329,7 +352,7 @@ function updateScroll() {
   heroOverlay.style.pointerEvents = y > heroEnd * 0.5 ? 'none' : '';
 
   // Dim the scene behind the content sections for legibility
-  scrimEl.style.opacity = String(clamp01((y - diveEnd) / (vh * 0.8)) * 0.6);
+  scrimEl.style.opacity = String(clamp01((y - diveEnd) / (vh * 0.8)) * 0.74);
 
   if (!modelReady) return;
 
@@ -438,51 +461,30 @@ if (!params.has('cam')) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ②  ANIMATION ENGINE (Lusion-style)
+   ②  ANIMATION ENGINE
 ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Custom cursor ─────────────────────────────────────────── */
-const cursorEl  = document.getElementById('cursor');
-const cursorDot = document.getElementById('cursor-dot');
-
-let curX = -200, curY = -200;
-
-document.addEventListener('mousemove', (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  cursorDot.style.transform = `translate(${e.clientX - curX - 5}px, ${e.clientY - curY - 5}px)`;
-});
-
-(function cursorLoop() {
-  curX += (mouseX - curX) * 0.12;
-  curY += (mouseY - curY) * 0.12;
-  cursorEl.style.transform = `translate(${curX}px, ${curY}px)`;
-  requestAnimationFrame(cursorLoop);
-})();
-
-document.querySelectorAll('a, button, [data-card]').forEach((el) => {
-  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-});
-
 /* ─── Magnetic effect ────────────────────────────────────────── */
-document.querySelectorAll('.magnetic').forEach((el) => {
-  el.addEventListener('mousemove', (e) => {
-    const r = el.getBoundingClientRect();
-    el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.28}px, ${(e.clientY - r.top - r.height / 2) * 0.28}px)`;
+if (!reduceMotion) {
+  document.querySelectorAll('.magnetic').forEach((el) => {
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.22}px, ${(e.clientY - r.top - r.height / 2) * 0.22}px)`;
+    });
+    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
   });
-  el.addEventListener('mouseleave', () => { el.style.transform = ''; });
-});
+}
 
 /* ─── Text splitting ─────────────────────────────────────────── */
+let charIndex = 0; // continues across hero name lines so the stagger flows
 function splitChars(el) {
   const text = el.textContent;
   el.textContent = '';
-  [...text].forEach((ch, i) => {
+  [...text].forEach((ch) => {
     const s = document.createElement('span');
     s.className = 'char';
-    s.style.setProperty('--i', i);
-    s.textContent = ch === ' ' ? ' ' : ch;
+    s.style.setProperty('--i', charIndex++);
+    s.textContent = ch;
     el.appendChild(s);
   });
 }
@@ -500,14 +502,14 @@ function splitLines(el) {
   ).join('');
 }
 
-const heroName = document.querySelector('#hero-name .name-line');
-if (heroName) splitChars(heroName);
+document.querySelectorAll('#hero-name .name-line').forEach(splitChars);
 document.querySelectorAll('[data-split-words]').forEach(splitWords);
 document.querySelectorAll('[data-split-lines]').forEach(splitLines);
 
 /* ─── Hero entrance sequence ─────────────────────────────────── */
 function startHeroEntrance() {
   heroOverlay.classList.add('ready', 'hero-ready');
+  document.getElementById('site-nav')?.classList.add('ready');
   setTimeout(() => document.getElementById('hero-name')?.classList.add('hero-in'), 350);
   setTimeout(() => document.querySelector('.hero-eyebrow')?.classList.add('hero-in'), 550);
   setTimeout(() => document.querySelector('.hero-lede')?.classList.add('hero-in'), 750);
@@ -522,37 +524,52 @@ const io = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
 
-document.querySelectorAll(`
-  [data-reveal], .section-heading, .skill-card, .edu-card,
-  .proj-list-label, .proj-list-item, .ref-card, .ref-intro, .site-footer,
-  .planet-copy
-`).forEach((el) => io.observe(el));
+document.querySelectorAll('[data-reveal], .section-heading, .planet-copy').forEach((el) => io.observe(el));
 
-/* ─── Parallax: section numbers drift on scroll ─────────────── */
-window.addEventListener('scroll', () => {
-  document.querySelectorAll('.section-label .label-num').forEach((num) => {
-    const rect = num.closest('.section').getBoundingClientRect();
-    num.style.transform = `translateY(${clamp01(-rect.top / rect.height) * -30}px)`;
-  });
-}, { passive: true });
+/* ─── Section headings drift slightly against the scroll ─────── */
+const parallaxHeads = [...document.querySelectorAll('.section-heading')];
+function parallax() {
+  if (reduceMotion) return;
+  const vh = window.innerHeight;
+  for (const h of parallaxHeads) {
+    const r = h.getBoundingClientRect();
+    if (r.bottom < -200 || r.top > vh + 200) continue;
+    h.style.transform = 'translateY(' + (((r.top - vh / 2) / vh) * 28).toFixed(1) + 'px)';
+  }
+}
+window.addEventListener('scroll', parallax, { passive: true });
+parallax();
 
-/* ─── Hover glow on skill cards ──────────────────────────────── */
-document.querySelectorAll('.skill-card').forEach((card) => {
-  card.addEventListener('mousemove', (e) => {
-    const r = card.getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1);
-    const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
-    card.querySelector('.card-glow').style.background =
-      `radial-gradient(circle at ${x}% ${y}%, rgba(244,163,64,0.12) 0%, transparent 65%)`;
-  });
+/* ─── Spotlight follows the cursor inside panels and projects ── */
+document.querySelectorAll('[data-spot]').forEach((el) => {
+  el.addEventListener('mousemove', (e) => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }, { passive: true });
 });
 
-/* ─── Nav links: plain smooth scroll to the section ─────────── */
+/* ─── Nav: highlight the section currently in view ───────────── */
+const navLinks = [...document.querySelectorAll('.nav-link')];
+const navMap = new Map(navLinks.map((a) => [a.getAttribute('href').slice(1), a]));
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    navLinks.forEach((a) => a.classList.remove('active'));
+    navMap.get(e.target.id)?.classList.add('active');
+  });
+}, { rootMargin: '-45% 0px -45% 0px' });
+navMap.forEach((_, id) => { const sec = document.getElementById(id); if (sec) spy.observe(sec); });
+
+/* ─── Anchor links: smooth scroll to the section ─────────────── */
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
   a.addEventListener('click', (e) => {
-    const target = document.querySelector(a.getAttribute('href'));
-    if (!target) return;
+    const id = a.getAttribute('href');
+    const el = id === '#top' ? null : document.querySelector(id);
+    if (id !== '#top' && !el) return;
     e.preventDefault();
-    window.scrollTo({ top: docTop(target), behavior: 'smooth' });
+    const dest = el ? docTop(el) : 0;
+    if (lenis) lenis.scrollTo(dest, { duration: 1.8 });
+    else window.scrollTo({ top: dest, behavior: reduceMotion ? 'auto' : 'smooth' });
   });
 });
