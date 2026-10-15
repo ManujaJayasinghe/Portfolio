@@ -123,8 +123,13 @@ p { text-wrap: pretty; }
 }
 #site-nav.ready { opacity: 1; transform: translate(-50%, 0); }
 .nav-logo {
+  display: inline-flex; align-items: center; gap: 10px;
   font-family: var(--font-m); font-weight: 500; font-size: 13px;
   letter-spacing: 0.2em; text-decoration: none; color: var(--corona);
+}
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--amber-line);
 }
 .nav-links { display: flex; gap: 4px; }
 .nav-link {
@@ -523,6 +528,28 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
 /* ── Contact ─────────────────────────────────────────────────── */
 .contact-intro { font-size: clamp(17px, 1.6vw, 21px); line-height: 1.6; font-weight: 300; color: var(--muted); max-width: 520px; margin-bottom: 36px; }
 
+/* Contact header: copy left, portrait right */
+.contact-top {
+  display: grid; grid-template-columns: 1fr auto; align-items: end;
+  gap: clamp(28px, 5vw, 72px); margin-bottom: clamp(40px, 7vh, 64px);
+}
+.contact-top .section-heading { margin-bottom: clamp(28px, 4vh, 40px); }
+.contact-top .contact-intro { margin-bottom: 0; }
+/* double bezel: outer tray + inner photo, concentric radii */
+.portrait { margin: 0; }
+.portrait-frame {
+  width: clamp(220px, 24vw, 320px); padding: 6px;
+  border-radius: calc(var(--r-panel) + 6px);
+  border: 1px solid rgba(245,240,232,0.12);
+  background: rgba(245,240,232,0.04);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+}
+.portrait-frame img {
+  display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover;
+  border-radius: var(--r-panel);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
 /* The email is the headline of this section */
 .mail-block { margin-bottom: clamp(56px, 9vh, 96px); }
 .mail-link {
@@ -617,6 +644,9 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
   .thumbs { grid-auto-columns: 36%; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 6px; }
   .thumb { scroll-snap-align: start; }
   .showcase { padding: 14px; }
+  .contact-top { grid-template-columns: 1fr; }
+  .portrait-frame { width: 200px; }
+  .nav-logo span { display: none; }
   .mail-link { gap: 14px; }
   .site-footer { flex-direction: column; }
 }
