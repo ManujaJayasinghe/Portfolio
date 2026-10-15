@@ -573,3 +573,79 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     else window.scrollTo({ top: dest, behavior: reduceMotion ? 'auto' : 'smooth' });
   });
 });
+
+/* ─── Project galleries: thumbnails swap the main screenshot ──── */
+document.querySelectorAll('[data-gallery]').forEach((gallery) => {
+  const main    = gallery.querySelector('[data-main]');
+  const caption = gallery.querySelector('[data-caption]');
+  const thumbs  = [...gallery.querySelectorAll('.thumb')];
+
+  thumbs.forEach((t) => t.addEventListener('click', () => {
+    if (t.classList.contains('active')) return;
+    thumbs.forEach((o) => { o.classList.toggle('active', o === t); o.setAttribute('aria-selected', o === t); });
+    caption.textContent = t.dataset.caption;
+    main.classList.add('swapping');
+    const next = new Image();
+    next.onload = () => {
+      main.src = t.dataset.full;
+      main.alt = t.dataset.alt;
+      requestAnimationFrame(() => main.classList.remove('swapping'));
+    };
+    next.src = t.dataset.full;
+  }));
+});
+
+/* ─── Media viewer: demo videos and enlarged screenshots ─────── */
+const dialog      = document.getElementById('media-dialog');
+const dialogStage = dialog.querySelector('[data-dialog-stage]');
+const dialogTitle = dialog.querySelector('[data-dialog-title]');
+
+function openDialog(title, node) {
+  dialogTitle.textContent = title;
+  dialogStage.replaceChildren(node);
+  if (lenis) lenis.stop();
+  dialog.showModal();
+}
+function clearDialog() {
+  dialogStage.querySelector('video')?.pause();
+  dialogStage.replaceChildren();
+  if (lenis) lenis.start();
+}
+dialog.addEventListener('close', clearDialog);
+dialog.querySelector('[data-dialog-close]').addEventListener('click', () => dialog.close());
+dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); }); // click on the backdrop
+
+document.querySelectorAll('[data-video]').forEach((btn) => btn.addEventListener('click', () => {
+  const v = document.createElement('video');
+  v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = 'metadata';
+  v.poster = btn.dataset.poster; v.src = btn.dataset.video;
+  openDialog(btn.dataset.title, v);
+}));
+
+document.querySelectorAll('[data-zoom]').forEach((btn) => btn.addEventListener('click', () => {
+  const src = btn.querySelector('img');
+  const img = new Image();
+  img.src = src.src; img.alt = src.alt;
+  openDialog(btn.closest('[data-gallery]').querySelector('[data-caption]').textContent, img);
+}));
+
+/* ─── Copy email ─────────────────────────────────────────────── */
+document.querySelectorAll('[data-copy]').forEach((btn) => {
+  const label = btn.querySelector('[data-copy-label]');
+  const idle  = label.textContent;
+  let timer;
+  btn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(btn.dataset.copy);
+      label.textContent = 'Copied';
+    } catch {
+      label.textContent = 'Press Ctrl+C to copy';
+      const range = document.createRange();
+      range.selectNodeContents(document.querySelector('.mail-text'));
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    }
+    btn.classList.add('copied');
+    clearTimeout(timer);
+    timer = setTimeout(() => { label.textContent = idle; btn.classList.remove('copied'); }, 2200);
+  });
+});
