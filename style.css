@@ -362,7 +362,17 @@ p { text-wrap: pretty; }
 .b-mobile, .b-db, .b-ship { grid-column: span 4; }
 
 /* ── Projects ────────────────────────────────────────────────── */
-.project-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+/* Sticky stack: plain stacked list by default, pinned cards on large screens (see main.js) */
+.stack { display: flex; flex-direction: column; gap: 24px; }
+.stack-card > article { transform-origin: 50% 0%; will-change: auto; }
+/* cards overlap while stacking, so their surfaces must be opaque */
+.stack .showcase, .stack .project--feature { background-color: #0d0a07; }
+.stack--pinned { gap: 0; }
+.stack--pinned .stack-card {
+  min-height: 100dvh; display: flex; align-items: center;
+  padding: 88px 0 28px;
+}
+.stack--pinned .stack-card > article { width: 100%; will-change: transform, opacity; }
 .project {
   padding: clamp(26px, 3.4vw, 44px);
   display: flex; flex-direction: column; gap: 18px;

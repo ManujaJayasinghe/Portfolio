@@ -31,7 +31,17 @@ const params = new URLSearchParams(location.search);
 /* Smooth scrolling (Lenis) — native scroll position is still the source of truth */
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lenis = window.Lenis && !reduceMotion ? new window.Lenis({ lerp: 0.09, smoothWheel: true }) : null;
-if (lenis) (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+if (lenis) {
+  if (window.gsap && window.ScrollTrigger) {
+    // One clock for Lenis and ScrollTrigger so pinned sections never jitter
+    gsap.registerPlugin(ScrollTrigger);
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((t) => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+  } else {
+    (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+  }
+}
 let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
 document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
 const vec = (s) => s && (s.startsWith('p')
@@ -649,3 +659,51 @@ document.querySelectorAll('[data-copy]').forEach((btn) => {
     timer = setTimeout(() => { label.textContent = idle; btn.classList.remove('copied'); }, 2200);
   });
 });
+
+
+/* ─── Projects: sticky stack (GSAP ScrollTrigger) ────────────────
+   Each card pins at the top of the viewport; the next one slides over it
+   while the one underneath shrinks and dims. Desktop only, and skipped for
+   reduced motion. Elsewhere the cards simply stack in normal flow. */
+const stackEl = document.querySelector('.stack');
+if (stackEl && window.gsap && window.ScrollTrigger) {
+  gsap.registerPlugin(ScrollTrigger);
+  const mm = gsap.matchMedia();
+  mm.add('(min-width: 1000px) and (min-height: 540px) and (prefers-reduced-motion: no-preference)', () => {
+    stackEl.classList.add('stack--pinned');
+    const cards = gsap.utils.toArray('.stack-card', stackEl);
+    const last  = cards[cards.length - 1];
+
+    // Shrink each card just enough to fit the window, so the effect works on short screens too
+    const fit = () => {
+      const room = window.innerHeight - 120; // nav above, breathing room below
+      cards.forEach((card) => {
+        const art = card.firstElementChild;
+        art.style.zoom = 1;
+        art.style.zoom = Math.min(1, Math.max(0.62, room / art.offsetHeight));
+      });
+    };
+    fit();
+    ScrollTrigger.addEventListener('refreshInit', fit);
+
+    cards.forEach((card, i) => {
+      if (card === last) return;
+      ScrollTrigger.create({
+        trigger: card, start: 'top top',
+        endTrigger: last, end: 'top top',
+        pin: true, pinSpacing: false,
+      });
+      // The card underneath recedes as the next one arrives
+      gsap.to(card.firstElementChild, {
+        scale: 0.92, opacity: 0.45, ease: 'none',
+        scrollTrigger: { trigger: cards[i + 1], start: 'top bottom', end: 'top top', scrub: true },
+      });
+    });
+    return () => {
+      ScrollTrigger.removeEventListener('refreshInit', fit);
+      cards.forEach((c) => { c.firstElementChild.style.zoom = ''; });
+      stackEl.classList.remove('stack--pinned');
+    };
+  });
+  window.addEventListener('load', () => ScrollTrigger.refresh());
+}
