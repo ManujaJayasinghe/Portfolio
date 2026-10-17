@@ -377,12 +377,12 @@ function updateScroll() {
     if (t < 0.5) lerpShot(K.heroOut,  K.approach, smooth(t / 0.5), target);
     else         lerpShot(K.approach, K.core,     easeIn((t - 0.5) / 0.5), target);
     // Swallowed by the dark, then a flash of light on the other side
-    voidEl.style.opacity = String(smooth(clamp01((t - 0.7) / 0.18)));
-    warpEl.style.opacity = String(easeIn(clamp01((t - 0.86) / 0.14)));
+    voidEl.style.opacity = String(smooth(clamp01((t - 0.55) / 0.3)));
+    warpEl.style.opacity = String(smooth(clamp01((t - 0.72) / 0.28)));
     planetMix = 0;
   } else {
     // Page 2+ — emerge beside the planet, then drift as content scrolls
-    const tIn    = clamp01((y - (diveEnd - vh)) / vh);
+    const tIn    = clamp01((y - (diveEnd - vh)) / (vh * 1.3));
     const tDrift = clamp01((y - diveEnd) / Math.max(1, docEnd - diveEnd));
     lerpShot(K.planet, K.drift, smooth(tDrift), target);
     if (planetMix === 0) snap = true; // hard cut while the screen is white
@@ -562,9 +562,13 @@ document.querySelectorAll('[data-spot]').forEach((el) => {
 /* ─── Nav: highlight the section currently in view ───────────── */
 const navLinks = [...document.querySelectorAll('.nav-link')];
 const navMap = new Map(navLinks.map((a) => [a.getAttribute('href').slice(1), a]));
+let navLock = false, navTimer; // while an anchor scroll is running, keep the clicked link highlighted
+const setActive = (id) => {
+  navLinks.forEach((a) => a.classList.toggle('active', a === navMap.get(id)));
+};
 const spy = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
-    if (!e.isIntersecting) return;
+    if (!e.isIntersecting || navLock) return;
     navLinks.forEach((a) => a.classList.remove('active'));
     navMap.get(e.target.id)?.classList.add('active');
   });
@@ -579,6 +583,12 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     if (id !== '#top' && !el) return;
     e.preventDefault();
     const dest = el ? docTop(el) : 0;
+    if (a.classList.contains('nav-link')) {
+      setActive(id.slice(1));
+      navLock = true;
+      clearTimeout(navTimer);
+      navTimer = setTimeout(() => { navLock = false; }, 2000);
+    }
     if (lenis) lenis.scrollTo(dest, { duration: 1.8 });
     else window.scrollTo({ top: dest, behavior: reduceMotion ? 'auto' : 'smooth' });
   });

@@ -135,7 +135,7 @@ p { text-wrap: pretty; }
 .nav-link {
   display: block; padding: 9px 15px; border-radius: 999px;
   font-size: 13px; font-weight: 450; text-decoration: none; color: var(--muted);
-  transition: color 0.3s ease, background 0.4s var(--ease);
+  transition: color 0.6s var(--ease), background-color 0.6s var(--ease);
 }
 .nav-link:hover { color: var(--corona); background: rgba(245,240,232,0.07); }
 .nav-link.active { color: #1a1004; background: var(--amber); }
@@ -166,13 +166,14 @@ p { text-wrap: pretty; }
 .btn-lg .btn-icon { width: 44px; height: 44px; }
 
 .btn-link {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 6px; font-size: 15px; font-weight: 450;
-  color: var(--muted); text-decoration: none;
-  transition: color 0.3s ease;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 11px 22px; font-size: 15px; font-weight: 500;
+  color: #fff; text-decoration: none;
+  border: 1.5px solid rgba(255,255,255,0.85); border-radius: 999px;
+  transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
 }
 .btn-link i { font-size: 19px; }
-.btn-link:hover { color: var(--amber); }
+.btn-link:hover { background: rgba(255,255,255,0.14); border-color: #fff; }
 .magnetic { will-change: transform; }
 
 /* ════════════════════════════════════════════
@@ -197,7 +198,7 @@ p { text-wrap: pretty; }
 }
 #hero-name {
   font-family: var(--font-d); font-weight: 600;
-  font-size: clamp(60px, 11.5vw, 176px);
+  font-size: clamp(48px, 8.5vw, 132px);
   line-height: 0.96; letter-spacing: -0.05em;
   color: var(--corona);
   margin-bottom: 30px;
@@ -208,9 +209,9 @@ p { text-wrap: pretty; }
   padding-bottom: 0.14em; margin-bottom: -0.14em;
 }
 .hero-lede {
-  font-size: clamp(15px, 1.4vw, 18px);
-  line-height: 1.6; color: var(--muted); font-weight: 300;
-  max-width: 460px; margin-bottom: 34px; overflow: hidden;
+  font-size: clamp(14px, 1.2vw, 16px);
+  line-height: 1.6; color: rgba(255,255,255,0.92); font-weight: 400;
+  max-width: 580px; margin-bottom: 34px; overflow: hidden;
 }
 .hero-actions {
   display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
