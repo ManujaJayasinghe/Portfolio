@@ -54,7 +54,7 @@ Then open <http://localhost:8000>.
 ├── style.css       Palette, type, layout, responsive rules
 ├── main.js         Three.js scene, scroll → camera logic, animation engine
 └── assets/
-    ├── scene.glb   Black hole model (single compressed file, ~5 MB)
+    ├── scene.glb   Black hole model (single compressed file, ~10 MB)
     ├── projects/   Screenshots and demo videos
     └── *.webp      Portrait and avatar
 ```
@@ -74,7 +74,7 @@ The model uses the older glTF spec-gloss workflow (`KHR_materials_pbrSpecularGlo
 
 ## Deploy
 
-Any static host works (Vercel, Netlify, GitHub Pages). Push the files as they are. The model is about 5 MB; the loading bar shows real download progress, and the page appears anyway after 12 seconds if the download is slow.
+Any static host works (Vercel, Netlify, GitHub Pages). Push the files as they are. The model is about 10 MB; the loading bar shows real download progress, and the page appears anyway after 12 seconds if the download is slow.
 
 ## Contact
 

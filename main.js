@@ -618,8 +618,10 @@ const setActive = (id) => {
 };
 const spy = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
-    if (!e.isIntersecting || navLock) return;
-    setActive(e.target.id);
+    if (navLock) return;
+    if (e.isIntersecting) setActive(e.target.id);
+    // Scrolled back above the first section (hero / planet page): nothing is active
+    else if (e.target.id === 'sec-skills' && e.boundingClientRect.top > 0) setActive(null);
   });
 }, { rootMargin: '-45% 0px -45% 0px' });
 navMap.forEach((_, id) => { const sec = document.getElementById(id); if (sec) spy.observe(sec); });
