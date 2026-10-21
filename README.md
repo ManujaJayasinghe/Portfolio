@@ -82,7 +82,7 @@ Any static host works (Vercel, Netlify, GitHub Pages). Push the files as they ar
 
 - Email: [manujapabasara36203@gmail.com](mailto:manujapabasara36203@gmail.com)
 - GitHub: [@ManujaJayasinghe](https://github.com/ManujaJayasinghe)
-- LinkedIn: [manuja-jayasinghe](https://linkedin.com/in/manuja-jayasinghe)
+- LinkedIn: [manuja-jayasinghe](https://www.linkedin.com/in/manuja-jayasinghe-2a78713a9)
 
 ## Credits
 
