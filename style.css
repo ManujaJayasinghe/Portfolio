@@ -34,7 +34,7 @@
 
 /* ── Reset ───────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { background: var(--void); scroll-behavior: auto; }
+html { background: var(--void); scroll-behavior: auto; color-scheme: dark; -webkit-tap-highlight-color: transparent; }
 body {
   font-family: var(--font-b);
   color: var(--corona);
@@ -625,7 +625,8 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--void); }
 ::-webkit-scrollbar-thumb { background: rgba(244,163,64,0.3); border-radius: 2px; }
-:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+.btn:focus-visible, .btn-link:focus-visible, .nav-link:focus-visible { outline-color: #fff; }
 
 /* ════════════════════════════════════════════
    RESPONSIVE
@@ -649,7 +650,9 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
   .nav-link { padding: 8px 10px; font-size: 12px; }
   .nav-logo { font-size: 12px; letter-spacing: 0.14em; }
   #hero-copy { padding: 88px 20px 4vh; }
-  #hero-name { font-size: clamp(52px, 14.5vw, 120px); }
+  #hero-name { font-size: clamp(44px, 13vw, 96px); margin-bottom: 20px; }
+  .hero-lede { font-size: 13.5px; line-height: 1.55; margin-bottom: 24px; }
+  .hero-actions { gap: 12px; }
   .b-mobile, .b-db { grid-column: span 12; }
   .contact-grid { grid-template-columns: 1fr; }
   .thumbs { grid-auto-columns: 36%; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 6px; }
