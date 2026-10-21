@@ -613,8 +613,8 @@ if (lenis && !params.has('cam')) {
   const EDGE = 0.15;         // of a viewport: how close counts as "at the edge"
   const easeOut   = (t) => 1 - Math.pow(1 - t, 3);                  // moves at once, settles gently
   const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-  let lastWheel = 0, lastAbs = 0, lastDir = 0;
-  let jumped = false, jumping = false, jumpDir = 0, jumpY = 0;
+  let lastWheel = 0, lastDir = 0;
+  let jumped = false, jumping = false, jumpDir = 0, jumpY = 0, jumpStart = 0, jumpIsDive = false;
 
   // refY: the position to page from (a chained flick pages on from where the
   // glide is heading, not from where it is right now)
@@ -622,7 +622,7 @@ if (lenis && !params.has('cam')) {
     const vh = window.innerHeight, y = refY;
     const make = (to) => {
       const dist = Math.abs(to - window.scrollY) / vh;
-      return { y: to, duration: Math.min(2.4, Math.max(0.7, 0.45 + dist * 0.5)), easing: dist > 2 ? easeInOut : easeOut };
+      return { y: to, dive: dist > 2, duration: Math.min(3.4, Math.max(1.0, 0.65 + dist * 0.7)), easing: dist > 2 ? easeInOut : easeOut };
     };
     const pages = getPages();
     const planetTop = docTop(pages[0]);
@@ -649,7 +649,7 @@ if (lenis && !params.has('cam')) {
   };
 
   const glide = (t, dir) => {
-    jumped = true; jumping = true; jumpDir = dir; jumpY = t.y;
+    jumped = true; jumping = true; jumpDir = dir; jumpY = t.y; jumpStart = performance.now(); jumpIsDive = t.dive;
     lenis.scrollTo(t.y, { duration: t.duration, easing: t.easing, onComplete: () => { jumping = false; } });
   };
 
@@ -658,16 +658,17 @@ if (lenis && !params.has('cam')) {
     const dir = Math.sign(deltaY);
     if (!dir) return true;
 
-    // A new gesture is a pause, a change of direction, or a fresh flick that
-    // spikes above the fading trackpad inertia
-    const now = performance.now(), abs = Math.abs(deltaY);
-    const newGesture = now - lastWheel > GESTURE_GAP || dir !== lastDir || (abs >= 40 && abs > lastAbs * 1.8);
-    lastWheel = now; lastAbs = abs; lastDir = dir;
+    // A new gesture is a pause in the wheel events or a change of direction
+    const now = performance.now();
+    const newGesture = now - lastWheel > GESTURE_GAP || dir !== lastDir;
+    lastWheel = now; lastDir = dir;
     if (newGesture) jumped = false;
 
     if (jumping && dir === jumpDir) {
-      // Same way again while gliding: skip ahead one more page, no waiting
-      if (newGesture) {
+      // Same way again while gliding: skip ahead one more page. Never during
+      // the black-hole dive (it always lands on the planet page), and only for
+      // a clearly separate scroll, not the tail of the one that started it.
+      if (newGesture && !jumpIsDive && now - jumpStart > 450) {
         const t = pageTarget(dir, jumpY);
         if (t && t.y !== jumpY) glide(t, dir);
       }
