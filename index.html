@@ -13,13 +13,13 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23060504'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23f4a340' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<a class="skip-link" href="#content-sections">Skip to content</a>
+<a class="skip-link" href="#sec-skills">Skip to content</a>
 
 <!-- WebGL canvas -->
 <canvas id="scene" aria-hidden="true"></canvas>
@@ -190,7 +190,7 @@
             <div class="frame">
               <div class="frame-bar"><span class="frame-label" data-caption>Candidate portal with AI assistant</span></div>
               <button class="frame-screen" type="button" data-zoom aria-label="Enlarge screenshot">
-                <img src="assets/projects/talentsync/candidate.webp" width="1600" height="766" alt="TalentSync candidate portal showing job recommendations and the AI assistant chat" data-main>
+                <img src="assets/projects/talentsync/candidate.webp" width="1600" height="766" alt="TalentSync candidate portal showing job recommendations and the AI assistant chat" loading="lazy" data-main>
                 <span class="zoom-hint"><i class="ph ph-arrows-out-simple" aria-hidden="true"></i></span>
               </button>
             </div>
@@ -302,7 +302,7 @@
               <p class="lead-org">NSBM Circularity and Sustainability Community (NCSC)</p>
             </li>
             <li>
-              <p class="lead-role">Director of Personal Relationships</p>
+              <p class="lead-role">Director of Public Relations</p>
               <p class="lead-org">Interact Club, 2021-2023</p>
             </li>
             <li>
@@ -369,7 +369,7 @@
 
     <footer class="site-footer" data-reveal>
       <span>&copy; 2026 Manuja Jayasinghe</span>
-      <span>Built with Three.js. Black hole model by <a href="https://sketchfab.com/Nestaeric" target="_blank" rel="noopener">NestaEric</a> (CC BY 4.0)</span>
+      <span>Built with Three.js. <a href="https://sketchfab.com/3d-models/black-hole-e410da98b1e5445eae2acafaaa53587d" target="_blank" rel="noopener">"Black Hole"</a> model by <a href="https://sketchfab.com/Nestaeric" target="_blank" rel="noopener">NestaEric</a>, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></span>
     </footer>
   </section>
 
@@ -377,7 +377,7 @@
 
 
 <!-- Media viewer: demo videos and enlarged screenshots -->
-<dialog id="media-dialog" aria-label="Media viewer">
+<dialog id="media-dialog" aria-label="Media viewer" data-lenis-prevent>
   <div class="dialog-bar">
     <p class="dialog-title" data-dialog-title></p>
     <button class="dialog-close" type="button" data-dialog-close aria-label="Close"><i class="ph ph-x" aria-hidden="true"></i></button>
@@ -397,5 +397,19 @@
 }
 </script>
 <script type="module" src="main.js"></script>
+<!-- Safety net: if main.js never starts (a CDN is blocked or offline), show the
+     content as a plain page instead of leaving the loader up -->
+<script>
+  setTimeout(function () {
+    if (!window.__booted) document.documentElement.classList.add('fallback');
+  }, 9000);
+</script>
+<noscript><style>
+  #loader { display: none !important; }
+  #hero-overlay { position: relative !important; }
+  #dive-spacer { display: none !important; }
+  .hero-actions, [data-reveal], .planet-copy { opacity: 1 !important; transform: none !important; }
+  #site-nav { opacity: 1 !important; transform: translate(-50%, 0) !important; }
+</style></noscript>
 </body>
 </html>

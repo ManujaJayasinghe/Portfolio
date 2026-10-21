@@ -17,7 +17,7 @@
   --amber-line: rgba(244,163,64,0.32);
   --corona:     #f5f0e8;
   --muted:      rgba(245,240,232,0.66);
-  --faint:      rgba(245,240,232,0.42);
+  --faint:      rgba(245,240,232,0.58); /* ≥4.5:1 on the void for small labels */
   --line:       rgba(245,240,232,0.09);
   --panel:      rgba(14,11,8,0.74);
 
@@ -82,6 +82,21 @@ p { text-wrap: pretty; }
   pointer-events: none; opacity: 0;
   background: linear-gradient(180deg, rgba(5,4,3,0.9) 0%, rgba(5,4,3,0.78) 100%);
 }
+
+/* No WebGL or the model failed: a static glow stands in for the scene */
+html.no-3d #scene { display: none; }
+html.no-3d body {
+  background:
+    radial-gradient(60% 50% at 70% 40%, rgba(244,163,64,0.16), transparent 70%),
+    radial-gradient(40% 35% at 20% 80%, rgba(224,122,28,0.08), transparent 70%),
+    var(--void);
+  background-attachment: fixed;
+}
+/* Scripts never started (CDN blocked/offline): plain readable page */
+html.fallback #loader, html.fallback #dive-spacer { display: none; }
+html.fallback #hero-overlay { position: relative; pointer-events: auto; }
+html.fallback .hero-actions, html.fallback [data-reveal], html.fallback .planet-copy { opacity: 1; transform: none; }
+html.fallback #site-nav { opacity: 1; transform: translate(-50%, 0); }
 
 /* ── Loader ──────────────────────────────────────────────────── */
 #loader {
@@ -183,10 +198,12 @@ p { text-wrap: pretty; }
 ════════════════════════════════════════════ */
 #hero-overlay {
   position: fixed; inset: 0; z-index: 10;
-  display: flex; flex-direction: column; justify-content: center;
+  display: flex; flex-direction: column; justify-content: safe center; /* never push the top under the nav */
   pointer-events: none;
 }
 #hero-overlay.ready { pointer-events: auto; }
+/* Once the hero has faded out, its links must not take keyboard focus */
+#hero-overlay.gone { visibility: hidden; }
 #hero-copy {
   padding: 96px 6vw 4vh;
   max-width: 1500px; width: 100%; margin: 0 auto;
@@ -200,7 +217,7 @@ p { text-wrap: pretty; }
 }
 #hero-name {
   font-family: var(--font-d); font-weight: 600;
-  font-size: clamp(48px, 8.5vw, 132px);
+  font-size: clamp(44px, min(8.5vw, 13vh), 132px); /* width- and height-aware */
   line-height: 0.96; letter-spacing: -0.05em;
   color: var(--corona);
   margin-bottom: 30px;
@@ -264,7 +281,7 @@ p { text-wrap: pretty; }
 .section-inner--wide { max-width: 1320px; }
 
 /* Planet page */
-#sec-planet { min-height: 100vh; justify-content: flex-end; padding-bottom: 14vh; }
+#sec-planet { min-height: 100vh; min-height: 100dvh; justify-content: flex-end; padding-bottom: 14vh; }
 .planet-copy {
   max-width: 560px;
   opacity: 0; transform: translateY(24px);
@@ -461,9 +478,11 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
   display: flex; flex-direction: column; gap: 7px;
   padding: 0; border: 0; background: none; cursor: pointer; text-align: left;
   font-family: var(--font-m); font-size: 11px; letter-spacing: 0.04em; color: var(--faint);
-  opacity: 0.62;
   transition: opacity 0.3s ease, color 0.3s ease, transform 0.5s var(--ease-io);
 }
+/* Dim the inactive screenshot, not its label (keeps the label readable) */
+.thumb:not(.active) img { opacity: 0.62; transition: opacity 0.3s ease; }
+.thumb:not(.active):hover img { opacity: 1; }
 .thumb img {
   width: 100%; height: auto; display: block; aspect-ratio: 360 / 174; object-fit: cover; object-position: top;
   border-radius: 8px; border: 1px solid rgba(245,240,232,0.12);
@@ -663,7 +682,7 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
   .nav-link { padding: 8px 10px; font-size: 12px; }
   .nav-logo { font-size: 12px; letter-spacing: 0.14em; }
   #hero-copy { padding: 88px 20px 4vh; }
-  #hero-name { font-size: clamp(44px, 13vw, 96px); margin-bottom: 20px; }
+  #hero-name { font-size: clamp(38px, min(13vw, 10vh), 96px); margin-bottom: 20px; }
   .hero-lede { font-size: 13.5px; line-height: 1.55; margin-bottom: 24px; }
   .hero-actions { gap: 12px; }
   .b-mobile, .b-db { grid-column: span 12; }
@@ -676,6 +695,25 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
   .nav-logo span { display: none; }
   .mail-link { gap: 14px; }
   .site-footer { flex-direction: column; }
+}
+
+/* Very narrow phones: keep the nav pill inside the screen */
+@media (max-width: 360px) {
+  #site-nav { gap: 6px; padding: 0 6px 0 10px; max-width: calc(100vw - 16px); }
+  .nav-link { padding: 8px 7px; font-size: 11.5px; }
+  .nav-avatar { width: 28px; height: 28px; }
+}
+/* Short windows (small laptops, landscape phones): tighten the hero */
+@media (max-height: 700px) {
+  #hero-copy { padding-top: 84px; padding-bottom: 16px; }
+  .hero-eyebrow { margin-bottom: 14px; }
+  #hero-name { margin-bottom: 18px; }
+  .hero-lede { font-size: 13.5px; line-height: 1.5; margin-bottom: 20px; }
+}
+@media (max-height: 620px) {
+  .hero-lede {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4;
+  }
 }
 
 /* ── Reduced motion: everything lands in its final state ─────── */

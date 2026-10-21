@@ -54,14 +54,12 @@ Then open <http://localhost:8000>.
 ├── style.css       Palette, type, layout, responsive rules
 ├── main.js         Three.js scene, scroll → camera logic, animation engine
 └── assets/
-    ├── scene.gltf  Black hole model (keep together with the files below)
-    ├── scene.bin
-    ├── textures/
+    ├── scene.glb   Black hole model (single compressed file, ~5 MB)
     ├── projects/   Screenshots and demo videos
     └── *.webp      Portrait and avatar
 ```
 
-`scene.gltf` references `scene.bin` and `textures/` by relative path, so keep them in this layout.
+The model is compressed with meshopt (geometry) and WebP (textures); `main.js` registers the matching decoder. If the model or WebGL is unavailable, the site shows its content without the 3D scene.
 
 ## Customize
 
@@ -76,7 +74,7 @@ The model uses the older glTF spec-gloss workflow (`KHR_materials_pbrSpecularGlo
 
 ## Deploy
 
-Any static host works (Vercel, Netlify, GitHub Pages). Push the files as they are. The model is about 30 MB, so the first load is slow on a cold connection; the loading bar shows real download progress.
+Any static host works (Vercel, Netlify, GitHub Pages). Push the files as they are. The model is about 5 MB; the loading bar shows real download progress, and the page appears anyway after 12 seconds if the download is slow.
 
 ## Contact
 

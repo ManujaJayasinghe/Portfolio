@@ -1,7 +1,7 @@
 /**
  * MANUJA PORTFOLIO — main.js
  *
- * ① Three.js scene — "Black Hole" by NestaEric (assets/scene.gltf)
+ * ① Three.js scene — "Black Hole" by NestaEric (assets/scene.glb, compressed)
  *    The model holds both the black hole and a small planet orbiting
  *    inside its disk. Scroll drives one camera through four stages:
  *      hero   → wide shot of the black hole (page 1)
@@ -17,6 +17,7 @@
 
 import * as THREE from 'three';
 import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder }  from 'three/addons/libs/meshopt_decoder.module.js';
 import { EffectComposer }  from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass }      from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -26,6 +27,7 @@ import { OutputPass }      from 'three/addons/postprocessing/OutputPass.js';
    ①  THREE.JS SCENE
 ═══════════════════════════════════════════════════════════════ */
 
+window.__booted = true; // the inline fallback in index.html checks this
 const params = new URLSearchParams(location.search);
 
 /* Smooth scrolling (Lenis) — native scroll position is still the source of truth */
@@ -50,12 +52,21 @@ const vec = (s) => s && (s.startsWith('p')
 
 /* Renderer */
 const canvas   = document.getElementById('scene');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: params.has('cam') });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.outputColorSpace     = THREE.SRGBColorSpace;
-renderer.toneMapping          = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure  = 1.0;
+// No WebGL (old GPU, blocked drivers, some VMs): the site still works, just without the scene.
+// antialias is off because the post-processing chain renders into its own targets anyway.
+const MAX_DPR = 1.5;
+let renderer = null;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, preserveDrawingBuffer: params.has('cam') });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace     = THREE.SRGBColorSpace;
+  renderer.toneMapping          = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure  = 1.0;
+} catch (err) {
+  console.warn('WebGL unavailable, showing the site without the 3D scene', err);
+  renderer = null;
+}
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
@@ -138,9 +149,22 @@ const loaderEl   = document.getElementById('loader');
 const loaderFill = document.getElementById('loader-fill');
 
 const manager = new THREE.LoadingManager();
-manager.onProgress = (_, loaded, total) => {
-  loaderFill.style.width = `${Math.min(100, (loaded / total) * 100)}%`;
-};
+
+// Never trap visitors behind the loader: show the page without the scene if the
+// model fails, WebGL is missing, or the download is taking too long. A slow model
+// still pops in behind the content when it arrives.
+let pageShown = false;
+function showPage() {
+  if (pageShown) return;
+  pageShown = true;
+  loaderEl.classList.add('hidden');
+  setTimeout(startHeroEntrance, 0);
+}
+function sceneUnavailable() {
+  document.documentElement.classList.add('no-3d');
+  showPage();
+}
+setTimeout(showPage, 12000);
 
 const spinners = [];          // disk layers that rotate
 const dustMats = [];          // ring2 particle layer — faded out near the planet
@@ -149,10 +173,12 @@ const PLANET   = new THREE.Vector3(); // planet centre, world space
 let modelReady = false;
 
 const gltfLoader = new GLTFLoader(manager);
+gltfLoader.setMeshoptDecoder(MeshoptDecoder);
 gltfLoader.register((parser) => new SpecularGlossinessPlugin(parser));
 
-gltfLoader.load(
-  'assets/scene.gltf',
+if (!renderer) sceneUnavailable();
+else gltfLoader.load(
+  'assets/scene.glb',
   (gltf) => {
     const model = gltf.scene;
 
@@ -180,13 +206,15 @@ gltfLoader.load(
 
     modelReady = true;
     window.__ready = true;
-    loaderEl.classList.add('hidden');
-    startHeroEntrance();
+    updateScroll();
+    snap = true;
+    showPage();
   },
-  undefined,
+  // Real byte progress (the model is a single file)
+  (e) => { if (e.total) loaderFill.style.width = `${Math.min(100, (e.loaded / e.total) * 100)}%`; },
   (err) => {
     console.error('GLTF load error', err);
-    loaderEl.querySelector('#loader-label').textContent = 'Load failed';
+    sceneUnavailable();
   }
 );
 
@@ -203,7 +231,7 @@ function smoothPlanet(node) {
   sphere.scale.copy(old.scale);
   old.visible = false;
   old.parent.add(sphere);
-  old.material.map && (old.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy());
+  if (old.material.map && renderer) old.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
 }
 
 /* Black-hole colour grade
@@ -282,11 +310,12 @@ function tuneMaterial(mesh) {
 }
 
 /* ── Post-processing ─────────────────────────────────────── */
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.9, 0.6, 0.6);
-composer.addPass(bloom);
-composer.addPass(new OutputPass());
+const composer = renderer ? new EffectComposer(renderer) : null;
+if (composer) {
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.9, 0.6, 0.6));
+  composer.addPass(new OutputPass());
+}
 
 /* ── Camera keyframes ────────────────────────────────────── */
 /*
@@ -360,6 +389,7 @@ function updateScroll() {
   // Hero overlay fades as you start scrolling
   heroOverlay.style.opacity = String(clamp01(1 - (y / heroEnd) * 1.6));
   heroOverlay.style.pointerEvents = y > heroEnd * 0.5 ? 'none' : '';
+  heroOverlay.classList.toggle('gone', y > heroEnd * 0.66); // fully faded: out of the tab order
 
   // Dim the scene behind the content sections for legibility
   scrimEl.style.opacity = String(clamp01((y - diveEnd) / (vh * 0.8)) * 0.74);
@@ -377,8 +407,11 @@ function updateScroll() {
     if (t < 0.5) lerpShot(K.heroOut,  K.approach, smooth(t / 0.5), target);
     else         lerpShot(K.approach, K.core,     easeIn((t - 0.5) / 0.5), target);
     // Swallowed by the dark, then a flash of light on the other side
-    voidEl.style.opacity = String(smooth(clamp01((t - 0.55) / 0.3)));
-    warpEl.style.opacity = String(smooth(clamp01((t - 0.72) / 0.28)));
+    // (reduced motion: no flash, the cut happens in the dark instead)
+    const dark  = smooth(clamp01((t - 0.55) / 0.3));
+    const flash = smooth(clamp01((t - 0.72) / 0.28));
+    voidEl.style.opacity = String(reduceMotion ? Math.max(dark, flash) : dark);
+    warpEl.style.opacity = reduceMotion ? '0' : String(flash);
     planetMix = 0;
   } else {
     // Page 2+ — emerge beside the planet, then drift as content scrolls
@@ -386,8 +419,8 @@ function updateScroll() {
     const tDrift = clamp01((y - diveEnd) / Math.max(1, docEnd - diveEnd));
     lerpShot(K.planet, K.drift, smooth(tDrift), target);
     if (planetMix === 0) snap = true; // hard cut while the screen is white
-    voidEl.style.opacity = '0';
-    warpEl.style.opacity = String(1 - smooth(tIn));
+    voidEl.style.opacity = reduceMotion ? String(1 - smooth(tIn)) : '0';
+    warpEl.style.opacity = reduceMotion ? '0' : String(1 - smooth(tIn));
     planetMix = 1;
   }
   if (planetMix === 0 && current.pos.distanceTo(PLANET) < 200) snap = true; // scrolling back up
@@ -398,10 +431,18 @@ function updateScroll() {
 /* ── Render loop ─────────────────────────────────────────── */
 const clock = new THREE.Clock();
 
+const mediaDialog = document.getElementById('media-dialog');
+// Nothing to see: an overlay fully covers the canvas, or a demo video is open
+const sceneHidden = () =>
+  !modelReady || mediaDialog?.open ||
+  voidEl.style.opacity === '1' || warpEl.style.opacity === '1';
+
 function animate() {
+  if (!composer) return; // no WebGL
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
   const t  = clock.elapsedTime;
+  if (sceneHidden() && !snap) return;
 
   if (snap) {
     current.pos.copy(target.pos); current.look.copy(target.look);
@@ -450,18 +491,27 @@ if (params.has('cam')) {
     }
   };
   const wait = setInterval(() => { if (modelReady) { clearInterval(wait); freeze(); } }, 50);
-  window.updateScrollDisabled = true;
 }
 
 animate();
 
 /* ── Resize ──────────────────────────────────────────────── */
+// Debounced: resizing reallocates every post-processing target, and mobile
+// browsers fire resize while the URL bar slides in and out.
+let sceneResizeTimer;
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  composer.setSize(window.innerWidth, window.innerHeight);
-  updateScroll();
+  clearTimeout(sceneResizeTimer);
+  sceneResizeTimer = setTimeout(() => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    if (renderer) {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR)); // window moved to another screen
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR));
+      composer.setSize(window.innerWidth, window.innerHeight);
+    }
+    if (!params.has('cam')) updateScroll();
+  }, 120);
 });
 
 if (!params.has('cam')) {
@@ -569,11 +619,23 @@ const setActive = (id) => {
 const spy = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
     if (!e.isIntersecting || navLock) return;
-    navLinks.forEach((a) => a.classList.remove('active'));
-    navMap.get(e.target.id)?.classList.add('active');
+    setActive(e.target.id);
   });
 }, { rootMargin: '-45% 0px -45% 0px' });
 navMap.forEach((_, id) => { const sec = document.getElementById(id); if (sec) spy.observe(sec); });
+
+// Re-check by position (the observer does not re-fire for a section that was
+// already in view while the lock was on)
+function syncActive() {
+  const mid = window.innerHeight / 2;
+  let current = null;
+  navMap.forEach((_, id) => {
+    const r = document.getElementById(id)?.getBoundingClientRect();
+    if (r && r.top <= mid && r.bottom > mid) current = id;
+  });
+  setActive(current);
+}
+const unlockNav = () => { clearTimeout(navTimer); navLock = false; syncActive(); };
 
 /* ─── Anchor links: smooth scroll to the section ─────────────── */
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
@@ -587,10 +649,18 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
       setActive(id.slice(1));
       navLock = true;
       clearTimeout(navTimer);
-      navTimer = setTimeout(() => { navLock = false; }, 2000);
+      navTimer = setTimeout(unlockNav, 2500); // safety net if the scroll gets interrupted
     }
-    if (lenis) lenis.scrollTo(dest, { duration: 1.8 });
-    else window.scrollTo({ top: dest, behavior: reduceMotion ? 'auto' : 'smooth' });
+    // Keyboard users: move focus along with the scroll
+    const land = () => {
+      if (navLock) unlockNav();
+      if (el) {
+        if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+        el.focus({ preventScroll: true });
+      }
+    };
+    if (lenis) lenis.scrollTo(dest, { duration: 1.8, onComplete: land });
+    else { window.scrollTo({ top: dest, behavior: reduceMotion ? 'auto' : 'smooth' }); setTimeout(land, reduceMotion ? 0 : 900); }
   });
 });
 
@@ -653,10 +723,18 @@ if (lenis && !params.has('cam')) {
     lenis.scrollTo(t.y, { duration: t.duration, easing: t.easing, onComplete: () => { jumping = false; } });
   };
 
-  lenis.options.virtualScroll = ({ deltaY, event }) => {
+  // Page positions change when the window resizes: drop a glide aimed at the old layout
+  window.addEventListener('resize', () => { if (jumping) { lenis.reset(); jumping = false; } });
+
+  lenis.options.virtualScroll = ({ deltaX, deltaY, event }) => {
     if (event.type !== 'wheel' || event.ctrlKey || lenis.isStopped) return true;
+    if (Math.abs(deltaX) > Math.abs(deltaY)) return true;   // sideways swipe (e.g. the thumbnail strip)
     const dir = Math.sign(deltaY);
     if (!dir) return true;
+
+    // Something else (a nav click, the media dialog) took over the scroll:
+    // the glide is over even though its onComplete never ran
+    if (jumping && !(lenis.animate.isRunning && Math.abs(lenis.animate.to - jumpY) < 2)) jumping = false;
 
     // A new gesture is a pause in the wheel events or a change of direction
     const now = performance.now();
@@ -764,11 +842,13 @@ document.querySelectorAll('[data-copy]').forEach((btn) => {
 
 
 /* ─── One screen per page ─────────────────────────────────────────
-   On desktop, scale each section's content (66% to 140%) so it fills the
+   On desktop, scale each section's content (72% to 115%) so it fills the
    window exactly, with the heading just under the nav. Re-measured a few
    times because text re-wraps as the scale (and so the line width) changes. */
 const fitSections = () => {
-  const on = window.innerWidth >= 1000 && window.innerHeight >= 540;
+  // Desktop only, and only where CSS zoom exists (Firefox < 126 has none). On short
+  // windows the content would get too small, so those pages just scroll instead.
+  const on = window.innerWidth >= 1000 && window.innerHeight >= 620 && CSS.supports('zoom', '1.1');
   ['sec-skills', 'sec-education', 'sec-contact'].forEach((id) => {
     const sec = document.getElementById(id);
     const inner = sec?.querySelector('.section-inner');
@@ -789,7 +869,7 @@ const fitSections = () => {
       return inner.getBoundingClientRect().height;
     };
     // Largest scale that still fits (binary search: wrapping makes height step, not slide)
-    let lo = 0.66, hi = 1.4;
+    let lo = 0.72, hi = 1.15;             // past ~1.15 text looks oversized on big screens
     if (apply(hi) <= room) lo = hi;
     else for (let n = 0; n < 9; n++) {
       const mid = (lo + hi) / 2;
@@ -811,7 +891,8 @@ const stackEl = document.querySelector('.stack');
 if (stackEl && window.gsap && window.ScrollTrigger) {
   gsap.registerPlugin(ScrollTrigger);
   const mm = gsap.matchMedia();
-  mm.add('(min-width: 1000px) and (min-height: 540px) and (prefers-reduced-motion: no-preference)', () => {
+  // Short windows can't fit a whole card (the screenshot keeps its size), so they get the plain list
+  mm.add('(min-width: 1000px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)', () => {
     stackEl.classList.add('stack--pinned');
     const cards = gsap.utils.toArray('.stack-card', stackEl);
     const last  = cards[cards.length - 1];
@@ -852,5 +933,5 @@ if (stackEl && window.gsap && window.ScrollTrigger) {
       stackEl.classList.remove('stack--pinned');
     };
   });
-  window.addEventListener('load', () => ScrollTrigger.refresh());
+  window.addEventListener('load', () => { fitSections(); ScrollTrigger.refresh(); });
 }

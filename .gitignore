@@ -1,1 +1,4 @@
-"graphify-out/" 
+graphify-out/
+.claude/
+.vscode/
+node_modules/
