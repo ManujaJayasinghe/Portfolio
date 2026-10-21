@@ -595,7 +595,7 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
 });
 
 /* ─── Page-by-page scrolling ─────────────────────────────────────
-   One wheel gesture glides to the next page (hero → dive → planet page,
+   One wheel gesture glides to the next page (flick again to skip ahead) (hero → dive → planet page,
    then section to section). Tall sections still scroll freely and only hand
    over once their bottom is on screen. Scrolling the other way interrupts. */
 if (lenis && !params.has('cam')) {
@@ -609,14 +609,21 @@ if (lenis && !params.has('cam')) {
       : [byId('sec-projects')];
     return [byId('sec-planet'), byId('sec-skills'), ...projects, byId('sec-education'), byId('sec-contact')];
   };
-  const GESTURE_GAP = 160;   // ms of silence that ends a wheel gesture
+  const GESTURE_GAP = 140;   // ms of silence that ends a wheel gesture
   const EDGE = 0.15;         // of a viewport: how close counts as "at the edge"
-  const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  let lastWheel = 0, lastDir = 0, jumped = false, jumping = false, jumpDir = 0;
+  const easeOut   = (t) => 1 - Math.pow(1 - t, 3);                  // moves at once, settles gently
+  const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+  let lastWheel = 0, lastAbs = 0, lastDir = 0;
+  let jumped = false, jumping = false, jumpDir = 0, jumpY = 0;
 
-  const pageTarget = (dir) => {
-    const vh = window.innerHeight, y = window.scrollY;
-    const make = (to) => ({ y: to, duration: Math.min(3.6, Math.max(1.1, 0.8 + (Math.abs(to - y) / vh) * 0.65)) });
+  // refY: the position to page from (a chained flick pages on from where the
+  // glide is heading, not from where it is right now)
+  const pageTarget = (dir, refY = window.scrollY) => {
+    const vh = window.innerHeight, y = refY;
+    const make = (to) => {
+      const dist = Math.abs(to - window.scrollY) / vh;
+      return { y: to, duration: Math.min(2.4, Math.max(0.7, 0.45 + dist * 0.5)), easing: dist > 2 ? easeInOut : easeOut };
+    };
     const pages = getPages();
     const planetTop = docTop(pages[0]);
 
@@ -641,25 +648,39 @@ if (lenis && !params.has('cam')) {
     return make(hp > vh * 1.05 ? tops[i - 1] + hp - vh : tops[i - 1]);
   };
 
+  const glide = (t, dir) => {
+    jumped = true; jumping = true; jumpDir = dir; jumpY = t.y;
+    lenis.scrollTo(t.y, { duration: t.duration, easing: t.easing, onComplete: () => { jumping = false; } });
+  };
+
   lenis.options.virtualScroll = ({ deltaY, event }) => {
     if (event.type !== 'wheel' || event.ctrlKey || lenis.isStopped) return true;
     const dir = Math.sign(deltaY);
     if (!dir) return true;
 
-    const now = performance.now();
-    const newGesture = now - lastWheel > GESTURE_GAP || dir !== lastDir;
-    lastWheel = now; lastDir = dir;
+    // A new gesture is a pause, a change of direction, or a fresh flick that
+    // spikes above the fading trackpad inertia
+    const now = performance.now(), abs = Math.abs(deltaY);
+    const newGesture = now - lastWheel > GESTURE_GAP || dir !== lastDir || (abs >= 40 && abs > lastAbs * 1.8);
+    lastWheel = now; lastAbs = abs; lastDir = dir;
     if (newGesture) jumped = false;
 
-    if (jumping && dir === jumpDir) { event.preventDefault(); return false; }  // already on its way
+    if (jumping && dir === jumpDir) {
+      // Same way again while gliding: skip ahead one more page, no waiting
+      if (newGesture) {
+        const t = pageTarget(dir, jumpY);
+        if (t && t.y !== jumpY) glide(t, dir);
+      }
+      event.preventDefault();
+      return false;
+    }
     if (jumping) { lenis.reset(); jumping = false; }                           // opposite way: interrupt
     if (jumped && !newGesture) { event.preventDefault(); return false; }       // trackpad inertia tail
 
     const t = pageTarget(dir);
     if (!t) return true;                                                       // free scroll
     event.preventDefault();
-    jumped = true; jumping = true; jumpDir = dir;
-    lenis.scrollTo(t.y, { duration: t.duration, easing: easeInOut, onComplete: () => { jumping = false; } });
+    glide(t, dir);
     return false;
   };
 }
