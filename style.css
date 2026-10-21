@@ -72,8 +72,10 @@ p { text-wrap: pretty; }
 #warp {
   position: fixed; inset: 0; z-index: 4;
   pointer-events: none; opacity: 0;
+  /* A warm amber glow, not a white-out: still opaque enough to hide the
+     camera cut, but easy on the eyes */
   background: radial-gradient(circle at 50% 50%,
-    #ffffff 0%, #fff4e0 30%, #ffc56e 70%, #e07a1c 100%);
+    #e9c593 0%, #d8913a 38%, #9c4e12 74%, #3d1705 100%);
 }
 #scrim {
   position: fixed; inset: 0; z-index: 2;
@@ -248,9 +250,12 @@ p { text-wrap: pretty; }
 ════════════════════════════════════════════ */
 #content-sections { position: relative; z-index: 20; }
 
+/* Every section is one full-screen page. Content starts just below the nav so
+   each heading lands in the same spot (main.js scales tall content to fit). */
 .section {
-  display: flex; flex-direction: column; justify-content: center;
-  padding: clamp(96px, 16vh, 168px) 0 clamp(40px, 8vh, 96px);
+  display: flex; flex-direction: column; justify-content: flex-start;
+  min-height: 100vh; min-height: 100dvh;
+  padding: 96px 0 32px;
 }
 
 .section-inner {
@@ -283,7 +288,11 @@ p { text-wrap: pretty; }
   font-family: var(--font-d); font-weight: 600;
   font-size: clamp(42px, 6.4vw, 88px);
   line-height: 1.02; letter-spacing: -0.045em;
-  margin-bottom: clamp(40px, 7vh, 72px);
+  margin-bottom: clamp(22px, 3.6vh, 40px);
+}
+.section-heading--compact {
+  font-size: clamp(34px, min(4.4vw, 7vh), 60px);
+  margin-bottom: clamp(16px, 2.6vh, 26px);
 }
 .section-heading .line-wrap {
   display: block; overflow: hidden;
@@ -366,12 +375,16 @@ p { text-wrap: pretty; }
 /* Sticky stack: plain stacked list by default, pinned cards on large screens (see main.js) */
 .stack { display: flex; flex-direction: column; gap: 24px; }
 .stack-card > article { transform-origin: 50% 0%; will-change: auto; }
+.stack-card > .section-heading { transform-origin: 0% 0%; }
 /* cards overlap while stacking, so their surfaces must be opaque */
 .stack .showcase, .stack .project--feature { background-color: #0d0a07; }
 .stack--pinned { gap: 0; }
+.stack-card { display: flex; flex-direction: column; }
+#sec-projects { padding-top: 0; padding-bottom: 0; min-height: 0; }
+.stack-card:first-child { padding-top: 96px; }
 .stack--pinned .stack-card {
-  min-height: 100dvh; display: flex; align-items: center;
-  padding: 88px 0 28px;
+  min-height: 100vh; min-height: 100dvh; justify-content: flex-start;
+  padding: 96px 0 28px;
 }
 .stack--pinned .stack-card > article { width: 100%; will-change: transform, opacity; }
 .project {
@@ -542,14 +555,14 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
 /* Contact header: copy left, portrait right */
 .contact-top {
   display: grid; grid-template-columns: 1fr auto; align-items: end;
-  gap: clamp(28px, 5vw, 72px); margin-bottom: clamp(40px, 7vh, 64px);
+  gap: clamp(28px, 5vw, 72px); margin-bottom: clamp(24px, 4vh, 40px);
 }
 .contact-top .section-heading { margin-bottom: clamp(28px, 4vh, 40px); }
 .contact-top .contact-intro { margin-bottom: 0; }
 /* double bezel: outer tray + inner photo, concentric radii */
 .portrait { margin: 0; }
 .portrait-frame {
-  width: clamp(220px, 24vw, 320px); padding: 6px;
+  width: clamp(170px, 15vw, 230px); padding: 6px;
   border-radius: calc(var(--r-panel) + 6px);
   border: 1px solid rgba(245,240,232,0.12);
   background: rgba(245,240,232,0.04);
@@ -562,10 +575,10 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
 }
 
 /* The email is the headline of this section */
-.mail-block { margin-bottom: clamp(56px, 9vh, 96px); }
+.mail-block { margin-bottom: clamp(28px, 5vh, 52px); }
 .mail-link {
   display: flex; align-items: center; justify-content: space-between; gap: 24px;
-  padding: clamp(22px, 3.4vw, 40px) 0;
+  padding: clamp(18px, 2.4vw, 30px) 0;
   border-top: 1px solid rgba(245,240,232,0.16); border-bottom: 1px solid rgba(245,240,232,0.16);
   font-family: var(--font-d); font-weight: 550;
   font-size: clamp(19px, 3.9vw, 54px); line-height: 1.1; letter-spacing: -0.04em;
@@ -604,15 +617,15 @@ button.btn { border: 0; cursor: pointer; font-family: inherit; }
 .contact-grid li {
   display: flex; flex-direction: column; gap: 6px;
   padding-top: 20px; border-top: 1px solid var(--line);
-  font-size: 15px; overflow-wrap: anywhere;
+  font-size: 17px; overflow-wrap: anywhere;
 }
-.contact-grid i { font-size: 22px; color: var(--amber); margin-bottom: 8px; }
-.contact-label { font-family: var(--font-m); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+.contact-grid i { font-size: 26px; color: var(--amber); margin-bottom: 8px; }
+.contact-label { font-family: var(--font-m); font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
 .contact-grid a { text-decoration: none; transition: color 0.3s ease; }
 .contact-grid a:hover { color: var(--amber); }
 
 .site-footer {
-  max-width: 1140px; width: 100%; margin: clamp(72px, 12vh, 140px) auto 0;
+  max-width: 1140px; width: 100%; margin: clamp(32px, 5vh, 64px) auto 0;
   padding: 24px clamp(20px, 5vw, 48px) 0;
   display: flex; justify-content: space-between; gap: 12px 32px; flex-wrap: wrap;
   border-top: 1px solid var(--line);

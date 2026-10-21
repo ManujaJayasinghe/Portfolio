@@ -532,7 +532,7 @@ const io = new IntersectionObserver((entries) => {
     e.target.classList.add('in');
     io.unobserve(e.target);
   });
-}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+}, { threshold: 0.12, rootMargin: '0px 0px -16px 0px' });
 
 document.querySelectorAll('[data-reveal], .section-heading, .planet-copy').forEach((el) => io.observe(el));
 
@@ -593,6 +593,76 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     else window.scrollTo({ top: dest, behavior: reduceMotion ? 'auto' : 'smooth' });
   });
 });
+
+/* ─── Page-by-page scrolling ─────────────────────────────────────
+   One wheel gesture glides to the next page (hero → dive → planet page,
+   then section to section). Tall sections still scroll freely and only hand
+   over once their bottom is on screen. Scrolling the other way interrupts. */
+if (lenis && !params.has('cam')) {
+  const byId = (id) => document.getElementById(id);
+  // Each pinned project card is its own page; GSAP wraps pinned cards in a
+  // spacer, which keeps a stable position in the document.
+  const getPages = () => {
+    const pinned = document.querySelector('.stack')?.classList.contains('stack--pinned');
+    const projects = pinned
+      ? [...document.querySelectorAll('.stack-card')].map((c) => c.closest('.pin-spacer') || c)
+      : [byId('sec-projects')];
+    return [byId('sec-planet'), byId('sec-skills'), ...projects, byId('sec-education'), byId('sec-contact')];
+  };
+  const GESTURE_GAP = 160;   // ms of silence that ends a wheel gesture
+  const EDGE = 0.15;         // of a viewport: how close counts as "at the edge"
+  const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  let lastWheel = 0, lastDir = 0, jumped = false, jumping = false, jumpDir = 0;
+
+  const pageTarget = (dir) => {
+    const vh = window.innerHeight, y = window.scrollY;
+    const make = (to) => ({ y: to, duration: Math.min(3.6, Math.max(1.1, 0.8 + (Math.abs(to - y) / vh) * 0.65)) });
+    const pages = getPages();
+    const planetTop = docTop(pages[0]);
+
+    // Hero + dive: the whole fall into the black hole is one page turn
+    if (y < planetTop - 8) return dir > 0 ? make(planetTop) : (y > 8 ? make(0) : null);
+
+    const tops = pages.map(docTop);
+    let i = 0;
+    tops.forEach((t, k) => { if (t <= y + 8) i = k; });
+    const h = pages[i].offsetHeight;
+    const short = h <= vh * 1.05;                                  // fits on one screen: a strict page
+
+    if (dir > 0) {
+      if (!pages[i + 1]) return null;                              // last section: free scroll
+      if (!short && tops[i] + h - (y + vh) > EDGE * vh) return null; // tall page: bottom not on screen yet
+      return make(tops[i + 1]);
+    }
+    if (short) { if (y - tops[i] > 8) return make(tops[i]); }      // snap back to this page's top first
+    else if (y - tops[i] > EDGE * vh) return null;                 // tall page: not at the top yet
+    if (i === 0) return make(0);                                   // back out of the planet page
+    const hp = pages[i - 1].offsetHeight;
+    return make(hp > vh * 1.05 ? tops[i - 1] + hp - vh : tops[i - 1]);
+  };
+
+  lenis.options.virtualScroll = ({ deltaY, event }) => {
+    if (event.type !== 'wheel' || event.ctrlKey || lenis.isStopped) return true;
+    const dir = Math.sign(deltaY);
+    if (!dir) return true;
+
+    const now = performance.now();
+    const newGesture = now - lastWheel > GESTURE_GAP || dir !== lastDir;
+    lastWheel = now; lastDir = dir;
+    if (newGesture) jumped = false;
+
+    if (jumping && dir === jumpDir) { event.preventDefault(); return false; }  // already on its way
+    if (jumping) { lenis.reset(); jumping = false; }                           // opposite way: interrupt
+    if (jumped && !newGesture) { event.preventDefault(); return false; }       // trackpad inertia tail
+
+    const t = pageTarget(dir);
+    if (!t) return true;                                                       // free scroll
+    event.preventDefault();
+    jumped = true; jumping = true; jumpDir = dir;
+    lenis.scrollTo(t.y, { duration: t.duration, easing: easeInOut, onComplete: () => { jumping = false; } });
+    return false;
+  };
+}
 
 /* ─── Project galleries: thumbnails swap the main screenshot ──── */
 document.querySelectorAll('[data-gallery]').forEach((gallery) => {
@@ -671,6 +741,46 @@ document.querySelectorAll('[data-copy]').forEach((btn) => {
 });
 
 
+/* ─── One screen per page ─────────────────────────────────────────
+   On desktop, scale each section's content (66% to 140%) so it fills the
+   window exactly, with the heading just under the nav. Re-measured a few
+   times because text re-wraps as the scale (and so the line width) changes. */
+const fitSections = () => {
+  const on = window.innerWidth >= 1000 && window.innerHeight >= 540;
+  ['sec-skills', 'sec-education', 'sec-contact'].forEach((id) => {
+    const sec = document.getElementById(id);
+    const inner = sec?.querySelector('.section-inner');
+    if (!inner) return;
+    inner.style.zoom = 1;
+    inner.style.maxWidth = '';
+    if (!on) return;
+    const cs = getComputedStyle(sec);
+    const baseWidth = parseFloat(getComputedStyle(inner).maxWidth);
+    const others = [...sec.children].filter((c) => c !== inner).reduce((s, c) => {
+      const m = getComputedStyle(c);
+      return s + c.offsetHeight + parseFloat(m.marginTop) + parseFloat(m.marginBottom);
+    }, 0);
+    const room = window.innerHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - others;
+    const apply = (z) => {
+      inner.style.zoom = z;
+      if (baseWidth) inner.style.maxWidth = `${baseWidth / z}px`; // keep the same visual width
+      return inner.getBoundingClientRect().height;
+    };
+    // Largest scale that still fits (binary search: wrapping makes height step, not slide)
+    let lo = 0.66, hi = 1.4;
+    if (apply(hi) <= room) lo = hi;
+    else for (let n = 0; n < 9; n++) {
+      const mid = (lo + hi) / 2;
+      if (apply(mid) <= room) lo = mid; else hi = mid;
+    }
+    apply(lo);
+  });
+};
+fitSections();
+document.fonts?.ready.then(() => { fitSections(); window.ScrollTrigger?.refresh(); });
+let fitTimer;
+window.addEventListener('resize', () => { clearTimeout(fitTimer); fitTimer = setTimeout(() => { fitSections(); window.ScrollTrigger?.refresh(); }, 150); });
+
 /* ─── Projects: sticky stack (GSAP ScrollTrigger) ────────────────
    Each card pins at the top of the viewport; the next one slides over it
    while the one underneath shrinks and dims. Desktop only, and skipped for
@@ -684,14 +794,19 @@ if (stackEl && window.gsap && window.ScrollTrigger) {
     const cards = gsap.utils.toArray('.stack-card', stackEl);
     const last  = cards[cards.length - 1];
 
-    // Shrink each card just enough to fit the window, so the effect works on short screens too
+    // Shrink the cards just enough that the tallest one (plus the heading on
+    // the first) fits the window. One shared scale keeps every card the same size.
     const fit = () => {
-      const room = window.innerHeight - 120; // nav above, breathing room below
-      cards.forEach((card) => {
-        const art = card.firstElementChild;
-        art.style.zoom = 1;
-        art.style.zoom = Math.min(1, Math.max(0.62, room / art.offsetHeight));
+      const arts = cards.map((card) => card.querySelector('article'));
+      arts.forEach((a) => { a.style.zoom = 1; });
+      let z = 1;
+      cards.forEach((card, i) => {
+        const head = card.querySelector('.section-heading');
+        const extra = head ? head.offsetHeight + parseFloat(getComputedStyle(head).marginBottom) : 0;
+        z = Math.min(z, (window.innerHeight - 96 - 28 - extra) / arts[i].offsetHeight);
       });
+      const zoom = Math.min(1, Math.max(0.62, z));
+      arts.forEach((a) => { a.style.zoom = zoom; });
     };
     fit();
     ScrollTrigger.addEventListener('refreshInit', fit);
@@ -703,15 +818,15 @@ if (stackEl && window.gsap && window.ScrollTrigger) {
         endTrigger: last, end: 'top top',
         pin: true, pinSpacing: false,
       });
-      // The card underneath recedes as the next one arrives
-      gsap.to(card.firstElementChild, {
-        scale: 0.92, opacity: 0.45, ease: 'none',
-        scrollTrigger: { trigger: cards[i + 1], start: 'top bottom', end: 'top top', scrub: true },
-      });
+      // The card underneath recedes as the next one arrives 
+      const recede = { trigger: cards[i + 1], start: 'top bottom', end: 'top top', scrub: true };
+      gsap.to(card.querySelector('article'), { scale: 0.92, opacity: 0.45, ease: 'none', scrollTrigger: recede });
+      const head = card.querySelector('.section-heading');   // the heading fades out fully, no ghost behind the next card
+      if (head) gsap.to(head, { opacity: 0, ease: 'none', scrollTrigger: recede });
     });
     return () => {
       ScrollTrigger.removeEventListener('refreshInit', fit);
-      cards.forEach((c) => { c.firstElementChild.style.zoom = ''; });
+      cards.forEach((c) => { c.querySelector('article').style.zoom = ''; });
       stackEl.classList.remove('stack--pinned');
     };
   });
